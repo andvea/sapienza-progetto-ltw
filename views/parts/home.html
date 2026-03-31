@@ -1,0 +1,181 @@
+<div class="container p-0">
+  <h4>Home</h4>
+  <div class="d-flex flex-grow-1 flex-shrink-1 flex-column mt-3 slides gap-3">
+    <div 
+      class="slide" 
+      style="background-color: white; border-radius: .75rem; box-shadow: rgba(0, 0, 0, 0.03) 0px 0.3125rem 0.3125rem -0.15625rem, rgba(0, 0, 0, 0.02) 0px 0.1875rem 0.1875rem -0.09375rem, rgba(0, 0, 0, 0.02) 0px 0.125rem 0.125rem -0.0625rem, rgba(0, 0, 0, 0.03) 0px 0.0625rem 0.0625rem -0.03125rem, rgba(0, 0, 0, 0.04) 0px 0.03125rem 0.03125rem 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 0.0625rem; width: 100%; padding: 20px;"
+    >
+      <canvas id="myChart1"></canvas>
+    </div>
+
+    <div 
+      class="slide" 
+      style="background-color: white; border-radius: .75rem; box-shadow: rgba(0, 0, 0, 0.03) 0px 0.3125rem 0.3125rem -0.15625rem, rgba(0, 0, 0, 0.02) 0px 0.1875rem 0.1875rem -0.09375rem, rgba(0, 0, 0, 0.02) 0px 0.125rem 0.125rem -0.0625rem, rgba(0, 0, 0, 0.03) 0px 0.0625rem 0.0625rem -0.03125rem, rgba(0, 0, 0, 0.04) 0px 0.03125rem 0.03125rem 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 0.0625rem; width: 100%; padding: 20px;"
+    >
+      <canvas id="myChart2"></canvas>
+    </div>
+  </div>
+</div><!-- end container -->
+
+
+
+<script type="text/javascript">
+  // See https://css-tricks.com/draggable-elements-push-others-way/
+  $(".slides").sortable({
+      placeholder: 'slide-placeholder',
+      axis: "y",
+      revert: 150,
+      start: function(e, ui){
+          
+          placeholderHeight = ui.item.outerHeight();
+          ui.placeholder.height(placeholderHeight);
+          $('<div class="slide-placeholder-animator" data-height="' + placeholderHeight + '"></div>').insertAfter(ui.placeholder);
+      
+      },
+      change: function(event, ui) {
+          
+          ui.placeholder.stop().height(0).animate({
+              height: ui.item.outerHeight()
+          }, 300);
+          
+          placeholderAnimatorHeight = parseInt($(".slide-placeholder-animator").attr("data-height"));
+          
+          $(".slide-placeholder-animator").stop().height(placeholderAnimatorHeight).animate({
+              height: 0
+          }, 300, function() {
+              $(this).remove();
+              placeholderHeight = ui.item.outerHeight();
+              $('<div class="slide-placeholder-animator" data-height="' + placeholderHeight + '"></div>').insertAfter(ui.placeholder);
+          });
+          
+      },
+      stop: function(e, ui) {
+          
+          $(".slide-placeholder-animator").remove();
+          
+      },
+  });
+</script>
+
+<script type="text/javascript">
+  var DATA_COUNT = 12;
+  var labels = [];
+  for (let i = 0; i < DATA_COUNT; ++i) {
+    labels.push(i.toString());
+  }
+  var datapoints = [0, 20, 20, 60, 60, 120, NaN, 180, 120, 125, 105, 110, 170];
+
+  new Chart(document.getElementById('myChart1'), {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Cubic interpolation (monotone)',
+          data: datapoints,
+          borderColor: '#DA3A3A',
+          fill: false,
+          cubicInterpolationMode: 'monotone',
+          tension: 0.4
+        }, {
+          label: 'Cubic interpolation',
+          data: datapoints,
+          borderColor: 'blue',
+          fill: false,
+          tension: 0.4
+        }, {
+          label: 'Linear interpolation (default)',
+          data: datapoints,
+          borderColor: 'green',
+          fill: false
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        title: {
+          display: true,
+          text: 'CHART 1 - Cubic interpolation mode'
+        },
+      },
+      interaction: {
+        intersect: false,
+      },
+      scales: {
+        x: {
+          display: true,
+          title: {
+            display: true
+          }
+        },
+        y: {
+          display: true,
+          title: {
+            display: true,
+            text: 'Value'
+          },
+          suggestedMin: -10,
+          suggestedMax: 200
+        }
+      }
+    },
+  });
+
+  new Chart(document.getElementById('myChart2'), {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Cubic interpolation (monotone)',
+          data: datapoints,
+          borderColor: '#DA3A3A',
+          fill: false,
+          cubicInterpolationMode: 'monotone',
+          tension: 0.4
+        }, {
+          label: 'Cubic interpolation',
+          data: datapoints,
+          borderColor: 'blue',
+          fill: false,
+          tension: 0.4
+        }, {
+          label: 'Linear interpolation (default)',
+          data: datapoints,
+          borderColor: 'green',
+          fill: false
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        title: {
+          display: true,
+          text: 'CHART 2 - Cubic interpolation mode'
+        },
+      },
+      interaction: {
+        intersect: false,
+      },
+      scales: {
+        x: {
+          display: true,
+          title: {
+            display: true
+          }
+        },
+        y: {
+          display: true,
+          title: {
+            display: true,
+            text: 'Value'
+          },
+          suggestedMin: -10,
+          suggestedMax: 200
+        }
+      }
+    },
+  });
+</script>

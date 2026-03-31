@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<form id="loginForm" method="POST" action="http://localhost:8080/signin?test=1">
+  <input type="text" name="username" placeholder="username"><br>
+  <input type="password" name="password" placeholder="password"><br>
+  <button type="submit">Invia</button>
+</form>
+
+</body>
+</html>
+
+<script>
+  const form = document.getElementById('loginForm');
+  const currentParams = new URLSearchParams(window.location.search);
+  const actionUrl = new URL(form.action);
+
+  currentParams.forEach((value, key) => {
+    actionUrl.searchParams.set(key, value);
+  });
+
+  form.action = actionUrl.toString();
+</script>

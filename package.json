@@ -1,0 +1,16 @@
+{
+  "name": "Sapienza - progetto LTW",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "type": "module",
+  "author": "Andrea P 1743880",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.3",
+    "jsonwebtoken": "^9.0.3"
+  }
+}
