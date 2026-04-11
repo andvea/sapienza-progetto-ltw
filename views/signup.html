@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<form id="signupForm" method="POST" action="http://localhost:8080/signup">
+  <input type="text" name="first_name" placeholder="Nome"><br>
+  <input type="text" name="last_name" placeholder="Cognome"><br>
+  <input type="text" name="profile_pic" placeholder="URL foto profilo"><br>
+  <input type="text" name="email" placeholder="Email"><br>
+  <input type="password" name="pwd" placeholder="Password"><br>
+  <button type="submit">Invia</button>
+</form>
+
+</body>
+</html>
+
+<script>
+  const form = document.getElementById('signupForm');
+  const currentParams = new URLSearchParams(window.location.search);
+  const actionUrl = new URL(form.action);
+
+  currentParams.forEach((value, key) => {
+    actionUrl.searchParams.set(key, value);
+  });
+
+  form.action = actionUrl.toString();
+</script>

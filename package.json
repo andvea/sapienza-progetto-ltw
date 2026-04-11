@@ -10,7 +10,9 @@
   "author": "Andrea P 1743880",
   "license": "ISC",
   "dependencies": {
+    "dotenv": "^17.4.1",
     "express": "^4.17.3",
-    "jsonwebtoken": "^9.0.3"
+    "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.22.0"
   }
 }
