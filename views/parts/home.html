@@ -1,17 +1,11 @@
 <div class="container p-0">
   <h4>Home</h4>
-  <div class="d-flex flex-grow-1 flex-shrink-1 flex-column mt-3 slides gap-3">
-    <div 
-      class="slide" 
-      style="background-color: white; border-radius: .75rem; box-shadow: rgba(0, 0, 0, 0.03) 0px 0.3125rem 0.3125rem -0.15625rem, rgba(0, 0, 0, 0.02) 0px 0.1875rem 0.1875rem -0.09375rem, rgba(0, 0, 0, 0.02) 0px 0.125rem 0.125rem -0.0625rem, rgba(0, 0, 0, 0.03) 0px 0.0625rem 0.0625rem -0.03125rem, rgba(0, 0, 0, 0.04) 0px 0.03125rem 0.03125rem 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 0.0625rem; width: 100%; padding: 20px;"
-    >
+  <div class="d-flex flex-grow-1 flex-shrink-1 mt-3 slides gap-3" style="flex-wrap: wrap;">
+    <div class="slide" style="width: 100%; background-color: white; border-radius: .75rem; box-shadow: rgba(0, 0, 0, 0.03) 0px 0.3125rem 0.3125rem -0.15625rem, rgba(0, 0, 0, 0.02) 0px 0.1875rem 0.1875rem -0.09375rem, rgba(0, 0, 0, 0.02) 0px 0.125rem 0.125rem -0.0625rem, rgba(0, 0, 0, 0.03) 0px 0.0625rem 0.0625rem -0.03125rem, rgba(0, 0, 0, 0.04) 0px 0.03125rem 0.03125rem 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 0.0625rem; padding: 20px;">
       <canvas id="myChart1"></canvas>
     </div>
 
-    <div 
-      class="slide" 
-      style="background-color: white; border-radius: .75rem; box-shadow: rgba(0, 0, 0, 0.03) 0px 0.3125rem 0.3125rem -0.15625rem, rgba(0, 0, 0, 0.02) 0px 0.1875rem 0.1875rem -0.09375rem, rgba(0, 0, 0, 0.02) 0px 0.125rem 0.125rem -0.0625rem, rgba(0, 0, 0, 0.03) 0px 0.0625rem 0.0625rem -0.03125rem, rgba(0, 0, 0, 0.04) 0px 0.03125rem 0.03125rem 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 0.0625rem; width: 100%; padding: 20px;"
-    >
+    <div class="slide" style="width: 100%; background-color: white; border-radius: .75rem; box-shadow: rgba(0, 0, 0, 0.03) 0px 0.3125rem 0.3125rem -0.15625rem, rgba(0, 0, 0, 0.02) 0px 0.1875rem 0.1875rem -0.09375rem, rgba(0, 0, 0, 0.02) 0px 0.125rem 0.125rem -0.0625rem, rgba(0, 0, 0, 0.03) 0px 0.0625rem 0.0625rem -0.03125rem, rgba(0, 0, 0, 0.04) 0px 0.03125rem 0.03125rem 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 0.0625rem; padding: 20px;">
       <canvas id="myChart2"></canvas>
     </div>
   </div>
@@ -22,39 +16,21 @@
 <script type="text/javascript">
   // See https://css-tricks.com/draggable-elements-push-others-way/
   $(".slides").sortable({
-      placeholder: 'slide-placeholder',
-      axis: "y",
-      revert: 150,
-      start: function(e, ui){
-          
-          placeholderHeight = ui.item.outerHeight();
-          ui.placeholder.height(placeholderHeight);
-          $('<div class="slide-placeholder-animator" data-height="' + placeholderHeight + '"></div>').insertAfter(ui.placeholder);
-      
-      },
-      change: function(event, ui) {
-          
-          ui.placeholder.stop().height(0).animate({
-              height: ui.item.outerHeight()
-          }, 300);
-          
-          placeholderAnimatorHeight = parseInt($(".slide-placeholder-animator").attr("data-height"));
-          
-          $(".slide-placeholder-animator").stop().height(placeholderAnimatorHeight).animate({
-              height: 0
-          }, 300, function() {
-              $(this).remove();
-              placeholderHeight = ui.item.outerHeight();
-              $('<div class="slide-placeholder-animator" data-height="' + placeholderHeight + '"></div>').insertAfter(ui.placeholder);
-          });
-          
-      },
-      stop: function(e, ui) {
-          
-          $(".slide-placeholder-animator").remove();
-          
-      },
+    placeholder: 'slide-placeholder',
+    revert: 150,
+    start: function(e, ui){
+      placeholderWidth = ui.item.outerWidth();
+      placeholderHeight = ui.item.outerHeight();
+      ui.placeholder.width(placeholderWidth);
+      ui.placeholder.height(placeholderHeight);
+      $('<div class="slide-placeholder-animator" data-width="'+placeholderWidth+'" data-height="' + placeholderHeight + '"></div>').insertAfter(ui.placeholder);
+    },
+    stop: function(e, ui) {  
+      $(".slide-placeholder-animator").remove();
+    }
   });
+
+  $( ".slide" ).resizable();
 </script>
 
 <script type="text/javascript">
