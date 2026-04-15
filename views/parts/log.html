@@ -1,8 +1,97 @@
-<!DOCTYPE html>
-<html>
-<body>
+<style>
+  .ltw-table-row{
+    border-bottom: 1px solid #ddd; 
+    padding: .6rem 1rem; 
+  }
 
-<p>Pagina eventi</p>
+  .ltw-table-header{
+    background-color: #f7f7f7; 
+    border-top-left-radius: inherit; 
+    border-top-right-radius: inherit;
+  }
 
-</body>
-</html>
+  .ltw-table-footer{
+    padding: .6rem 1rem; 
+    background-color: #f7f7f7; 
+    border-bottom-left-radius: inherit; 
+    border-bottom-right-radius: inherit;
+  }
+
+  .ltw-table-row > div[data-ltw-col="id"]{ flex: 100px 0 0; }
+  .ltw-table-row > div[data-ltw-col="kind"]{ flex: 200px 0 0; }
+  .ltw-table-row > div[data-ltw-col="desc"]{ flex: auto 1 0; }
+  .ltw-table-row > div[data-ltw-col="date"]{ flex: 200px 0 0; }
+  .ltw-table-row > div[data-ltw-col="action"]{ flex: 100px 0 0; }
+</style>
+
+<div class="container p-0">
+  <div class="d-flex align-items-center">
+    <div class="flex-grow-1">
+      <h4 class="m-0">Eventi</h4>
+    </div>
+    <div class="flex-grow-1 text-end">
+      <button class="btn btn-primary btn-sm" type="button">Nuovo evento</button>
+    </div>
+  </div>
+
+  <form class="d-flex mt-3 mb-5 gap-4" style="max-width: 60%;">
+    <div class="d-flex flex-grow-1 align-items-center gap-3">
+      <label for="dateFrom" class="form-label mb-0">Dal</label>
+      <input type="date" class="form-control flex-grow-1" id="dateFrom" placeholder="Dal">
+    </div>
+    <div class="d-flex flex-grow-1 align-items-center gap-3">
+      <label for="dateTo" class="form-label mb-0">Al</label>
+      <input type="date" class="form-control flex-grow-1" id="dateTo" placeholder="Dal">
+    </div>
+  </form>
+
+  <div class="d-flex flex-column rounded-3 bg-white border border-secondary-subtle">
+    <div class="d-flex flex-grow-1 ltw-table-header ltw-table-row">
+      <div data-ltw-col="id">ID</div>
+      <div data-ltw-col="kind">Tipo</div>
+      <div data-ltw-col="desc">Descrizione</div>
+      <div data-ltw-col="date">Data</div>
+      <div data-ltw-col="action">Azioni</div>
+    </div>
+
+    <div class="d-flex ltw-table-row flex-grow-1">
+      <div data-ltw-col="id">1</div>
+      <div data-ltw-col="kind">Pioggia</div>
+      <div data-ltw-col="desc"></div>
+      <div data-ltw-col="date">2 luglio 2012</div>
+      <div data-ltw-col="action"></div>
+    </div>
+    <div class="d-flex ltw-table-row flex-grow-1">
+      <div data-ltw-col="id">1</div>
+      <div data-ltw-col="kind">Pioggia</div>
+      <div data-ltw-col="desc"></div>
+      <div data-ltw-col="date">2 luglio 2012</div>
+      <div data-ltw-col="action"></div>
+    </div>
+    <div class="d-flex ltw-table-row flex-grow-1">
+      <div data-ltw-col="id">1</div>
+      <div data-ltw-col="kind">Pioggia</div>
+      <div data-ltw-col="desc"></div>
+      <div data-ltw-col="date">2 luglio 2012</div>
+      <div data-ltw-col="action"></div>
+    </div>
+
+    <div class="d-flex flex-grow-1 align-items-center gap-2 ltw-table-footer">
+      <div style="flex: auto 0 0;">
+        <nav aria-label="...">
+          <ul class="pagination" style="margin: 0;">
+            <li class="page-item disabled">
+              <a class="page-link"><</a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="#">></a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+      <div style="flex: auto 0 0;">
+        <p style="margin: 0;">1-50</p>
+      </div>
+    </div>
+  </div>
+</div><!-- end container -->
