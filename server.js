@@ -153,3 +153,28 @@ app.get('/admin/:page', async function(req, res){
     res.sendFile(__dirname+'/views/dashboard.html');
   }
 });
+
+app.get('/settings', async function(req, res){
+  var customer = new Customer(req.AUTH_MIDDLEWARE.userInfo.userId);
+  await customerRepository.getSettings(customer);
+  return res.status(200).send(customer.getSettings());
+});
+
+app.post('/settings/:entity', async function(req, res){
+  var customer = new Customer(req.AUTH_MIDDLEWARE.userInfo.userId);
+
+  try {
+    switch (req.params.entity) {
+      case 'charts':
+        await customerRepository.saveSetting(customer, req.params.entity, JSON.stringify(req.body));
+        return res.sendStatus(200);
+        break;
+      default:
+        return res.status(400).send('This entity doesn\'t exists');
+        break;
+    }
+  } catch(err) {
+    let errCode = (err.cause && err.cause.errorCode ? err.cause.errorCode : 500);
+    return res.status(errCode).send('An error occurred');
+  }
+});

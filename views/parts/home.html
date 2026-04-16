@@ -1,157 +1,218 @@
+<style>
+  .slide{
+    width: 100%;
+    background-color: white;
+    border-radius: .75rem;
+    box-shadow: rgba(0, 0, 0, 0.03) 0px 0.3125rem 0.3125rem -0.15625rem, rgba(0, 0, 0, 0.02) 0px 0.1875rem 0.1875rem -0.09375rem, rgba(0, 0, 0, 0.02) 0px 0.125rem 0.125rem -0.0625rem, rgba(0, 0, 0, 0.03) 0px 0.0625rem 0.0625rem -0.03125rem, rgba(0, 0, 0, 0.04) 0px 0.03125rem 0.03125rem 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 0.0625rem;
+    padding: 20px;
+  }
+</style>
+
 <div class="container p-0">
   <h4>Home</h4>
-  <div class="d-flex flex-grow-1 flex-shrink-1 mt-3 slides gap-3" style="flex-wrap: wrap;">
-    <div class="slide" style="width: 100%; background-color: white; border-radius: .75rem; box-shadow: rgba(0, 0, 0, 0.03) 0px 0.3125rem 0.3125rem -0.15625rem, rgba(0, 0, 0, 0.02) 0px 0.1875rem 0.1875rem -0.09375rem, rgba(0, 0, 0, 0.02) 0px 0.125rem 0.125rem -0.0625rem, rgba(0, 0, 0, 0.03) 0px 0.0625rem 0.0625rem -0.03125rem, rgba(0, 0, 0, 0.04) 0px 0.03125rem 0.03125rem 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 0.0625rem; padding: 20px;">
-      <canvas id="myChart1"></canvas>
-    </div>
-
-    <div class="slide" style="width: 100%; background-color: white; border-radius: .75rem; box-shadow: rgba(0, 0, 0, 0.03) 0px 0.3125rem 0.3125rem -0.15625rem, rgba(0, 0, 0, 0.02) 0px 0.1875rem 0.1875rem -0.09375rem, rgba(0, 0, 0, 0.02) 0px 0.125rem 0.125rem -0.0625rem, rgba(0, 0, 0, 0.03) 0px 0.0625rem 0.0625rem -0.03125rem, rgba(0, 0, 0, 0.04) 0px 0.03125rem 0.03125rem 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 0.0625rem; padding: 20px;">
-      <canvas id="myChart2"></canvas>
-    </div>
-  </div>
+  <div class="d-flex flex-grow-1 flex-shrink-1 mt-3 slides gap-3" style="flex-wrap: wrap;"></div>
 </div><!-- end container -->
 
-
-
 <script type="text/javascript">
-  // See https://css-tricks.com/draggable-elements-push-others-way/
-  $(".slides").sortable({
-    placeholder: 'slide-placeholder',
-    revert: 150,
-    start: function(e, ui){
-      placeholderWidth = ui.item.outerWidth();
-      placeholderHeight = ui.item.outerHeight();
-      ui.placeholder.width(placeholderWidth);
-      ui.placeholder.height(placeholderHeight);
-      $('<div class="slide-placeholder-animator" data-width="'+placeholderWidth+'" data-height="' + placeholderHeight + '"></div>').insertAfter(ui.placeholder);
-    },
-    stop: function(e, ui) {  
-      $(".slide-placeholder-animator").remove();
+  function loadCharts(){
+    var DATA_COUNT = 12;
+    var labels = [];
+    for (let i = 0; i < DATA_COUNT; ++i) {
+      labels.push(i.toString());
     }
-  });
+    var datapoints = [0, 20, 20, 60, 60, 120, NaN, 180, 120, 125, 105, 110, 170];
 
-  $( ".slide" ).resizable();
-</script>
+    new Chart(document.querySelector('#myChart1Container > canvas'), {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Cubic interpolation (monotone)',
+            data: datapoints,
+            borderColor: '#DA3A3A',
+            fill: false,
+            cubicInterpolationMode: 'monotone',
+            tension: 0.4
+          }, {
+            label: 'Cubic interpolation',
+            data: datapoints,
+            borderColor: 'blue',
+            fill: false,
+            tension: 0.4
+          }, {
+            label: 'Linear interpolation (default)',
+            data: datapoints,
+            borderColor: 'green',
+            fill: false
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: 'CHART 1 - Cubic interpolation mode'
+          },
+        },
+        interaction: {
+          intersect: false,
+        },
+        scales: {
+          x: {
+            display: true,
+            title: {
+              display: true
+            }
+          },
+          y: {
+            display: true,
+            title: {
+              display: true,
+              text: 'Value'
+            },
+            suggestedMin: -10,
+            suggestedMax: 200
+          }
+        }
+      },
+    });
 
-<script type="text/javascript">
-  var DATA_COUNT = 12;
-  var labels = [];
-  for (let i = 0; i < DATA_COUNT; ++i) {
-    labels.push(i.toString());
+    new Chart(document.querySelector('#myChart2Container > canvas'), {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Cubic interpolation (monotone)',
+            data: datapoints,
+            borderColor: '#DA3A3A',
+            fill: false,
+            cubicInterpolationMode: 'monotone',
+            tension: 0.4
+          }, {
+            label: 'Cubic interpolation',
+            data: datapoints,
+            borderColor: 'blue',
+            fill: false,
+            tension: 0.4
+          }, {
+            label: 'Linear interpolation (default)',
+            data: datapoints,
+            borderColor: 'green',
+            fill: false
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: 'CHART 2 - Cubic interpolation mode'
+          },
+        },
+        interaction: {
+          intersect: false,
+        },
+        scales: {
+          x: {
+            display: true,
+            title: {
+              display: true
+            }
+          },
+          y: {
+            display: true,
+            title: {
+              display: true,
+              text: 'Value'
+            },
+            suggestedMin: -10,
+            suggestedMax: 200
+          }
+        }
+      },
+    });
   }
-  var datapoints = [0, 20, 20, 60, 60, 120, NaN, 180, 120, 125, 105, 110, 170];
+  
+  function saveChartsConfig() {
+    const config = [];
 
-  new Chart(document.getElementById('myChart1'), {
-    type: 'line',
-    data: {
-      labels: labels,
-      datasets: [
-        {
-          label: 'Cubic interpolation (monotone)',
-          data: datapoints,
-          borderColor: '#DA3A3A',
-          fill: false,
-          cubicInterpolationMode: 'monotone',
-          tension: 0.4
-        }, {
-          label: 'Cubic interpolation',
-          data: datapoints,
-          borderColor: 'blue',
-          fill: false,
-          tension: 0.4
-        }, {
-          label: 'Linear interpolation (default)',
-          data: datapoints,
-          borderColor: 'green',
-          fill: false
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        title: {
-          display: true,
-          text: 'CHART 1 - Cubic interpolation mode'
-        },
-      },
-      interaction: {
-        intersect: false,
-      },
-      scales: {
-        x: {
-          display: true,
-          title: {
-            display: true
-          }
-        },
-        y: {
-          display: true,
-          title: {
-            display: true,
-            text: 'Value'
-          },
-          suggestedMin: -10,
-          suggestedMax: 200
-        }
-      }
-    },
-  });
+    $(".slides .slide").each(function(index) {
+      config.push({
+        id: $(this).attr("id"),
+        order: index,
+        width: $(this).outerWidth(),
+        height: $(this).outerHeight()
+      });
+    });
 
-  new Chart(document.getElementById('myChart2'), {
-    type: 'line',
-    data: {
-      labels: labels,
-      datasets: [
-        {
-          label: 'Cubic interpolation (monotone)',
-          data: datapoints,
-          borderColor: '#DA3A3A',
-          fill: false,
-          cubicInterpolationMode: 'monotone',
-          tension: 0.4
-        }, {
-          label: 'Cubic interpolation',
-          data: datapoints,
-          borderColor: 'blue',
-          fill: false,
-          tension: 0.4
-        }, {
-          label: 'Linear interpolation (default)',
-          data: datapoints,
-          borderColor: 'green',
-          fill: false
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        title: {
-          display: true,
-          text: 'CHART 2 - Cubic interpolation mode'
-        },
+    fetch('/settings/charts', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
       },
-      interaction: {
-        intersect: false,
-      },
-      scales: {
-        x: {
-          display: true,
-          title: {
-            display: true
-          }
-        },
-        y: {
-          display: true,
-          title: {
-            display: true,
-            text: 'Value'
-          },
-          suggestedMin: -10,
-          suggestedMax: 200
-        }
+      body: JSON.stringify(config)
+    })
+      .then(response => response.text())
+      .then(data => {
+        // show tooltip
+      })
+      .catch(error => {
+        // show error tooltip
+      });
+  }
+
+  fetch('/settings')
+    .then(response => response.json())
+    .then(settings => {
+      if (settings.charts) {
+        settings.charts.forEach((chartSettings) => {
+          $('.slides').append(`
+            <div id="${chartSettings.id}" class="slide" style="width: ${chartSettings.width}px; height: ${chartSettings.height}px;">
+              <canvas></canvas>
+            </div>`);
+        });
+      } else {
+        $('.slides').append(`
+          <div id="myChart1Container" class="slide">
+            <canvas></canvas>
+          </div>
+          <div id="myChart2Container" class="slide">
+            <canvas></canvas>
+          </div>`);
       }
-    },
-  });
+
+      // See https://css-tricks.com/draggable-elements-push-others-way/
+      $(".slides").sortable({
+        placeholder: 'slide-placeholder',
+        revert: 150,
+        start: function(e, ui){
+          placeholderWidth = ui.item.outerWidth();
+          placeholderHeight = ui.item.outerHeight();
+          ui.placeholder.width(placeholderWidth);
+          ui.placeholder.height(placeholderHeight);
+          $('<div class="slide-placeholder-animator" data-width="'+placeholderWidth+'" data-height="' + placeholderHeight + '"></div>').insertAfter(ui.placeholder);
+        },
+        stop: function(e, ui) {  
+          $(".slide-placeholder-animator").remove();
+        },
+        update: function(event, ui) {
+          saveChartsConfig();
+        }
+      });
+
+      $(".slide").resizable({
+        stop: function(event, ui) {
+          saveChartsConfig();
+        }
+      });
+
+      loadCharts();
+    })
+    .catch(error => {
+      console.log(error);
+    });
 </script>

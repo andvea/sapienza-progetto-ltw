@@ -54,6 +54,15 @@ export class Customer {
   setProfilePic(profilePic){
     this.profile_pic = profilePic;
   }
+
+  getSettings(){
+    return this.settings;
+  }
+
+  setSetting(name, value){
+    this.settings = (!this.settings ? {} : this.settings);
+    this.settings[name] = value;
+  }
 }
 
 export class CustomerRepository {
@@ -120,7 +129,58 @@ export class CustomerRepository {
     } catch(dbError) {
       throw new Error((dbError.message ? dbError.message : 'An error occurred with db'), {
         cause: {
-          errorCode: (dbError.cause.errorCode ? dbError.cause.errorCode : 500),
+          errorCode: (dbError.cause && dbError.cause.errorCode ? dbError.cause.errorCode : 500),
+          originError: dbError
+        }
+      });
+    }
+  }
+
+  async getSettings(customer) {
+    try {
+      var res = await this.mySqlPool.query(`
+        SELECT *
+        FROM ${global.ENV.DATABASE_CUSTOMERS_SETTINGS_TABLE}
+        WHERE customer_local_id = ?`,
+        [customer.getId()]);
+
+      for (var i=0; i<res[0].length; i++) {
+        customer.setSetting(res[0][i].name, res[0][i].value);
+      }
+
+      return customer;
+    } catch(dbError) {
+      throw new Error((dbError.message ? dbError.message : 'An error occurred with db'), {
+        cause: {
+          errorCode: (dbError.cause && dbError.cause.errorCode ? dbError.cause.errorCode : 500),
+          originError: dbError
+        }
+      });
+    }
+  }
+
+  async saveSetting(customer, settingName, settingValue) {
+    try {
+      var res = await this.mySqlPool.query(`
+        INSERT INTO
+          ${global.ENV.DATABASE_CUSTOMERS_SETTINGS_TABLE} 
+          (customer_local_id, name, value) 
+        VALUES (?, ?, ?) 
+        ON DUPLICATE KEY UPDATE value = ?`,
+        [
+          customer.getId(),
+          settingName,
+          settingValue,
+          settingValue
+        ]);
+
+      customer.setSetting(settingName, JSON.parse(settingValue));
+
+      return customer;
+    } catch(dbError) {
+      throw new Error((dbError.message ? dbError.message : 'An error occurred with db'), {
+        cause: {
+          errorCode: (dbError.cause && dbError.cause.errorCode ? dbError.cause.errorCode : 500),
           originError: dbError
         }
       });
