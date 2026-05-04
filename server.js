@@ -43,7 +43,7 @@ app.use((req, res, next) => {
   );
   next();
 });
-app.use('/static', express.static('/static'));
+app.use('/static', express.static('static'));
 
 const port = process.env.PORT || 8080;
 const server = app.listen(port, 'localhost');
@@ -179,3 +179,7 @@ app.post('/settings/:entity', async function(req, res){
     return res.status(errCode).send('An error occurred');
   }
 });
+
+app.post('/events', function(req, res){
+  return res.sendStatus(200);
+})

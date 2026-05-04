@@ -30,7 +30,10 @@
       <h4 class="m-0">Eventi</h4>
     </div>
     <div class="flex-grow-1 text-end">
-      <button class="btn btn-primary btn-sm" type="button">Nuovo evento</button>
+      <!-- Button trigger modal (modal is in dashboard.html for z-index issue) -->
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createEventModal">
+        Crea evento
+      </button>
     </div>
   </div>
 
@@ -95,3 +98,34 @@
     </div>
   </div>
 </div><!-- end container -->
+
+<script type="text/javascript">
+  $(document).ready(function() {
+    $('#createEventModal .btn-primary').on('click', function() {
+      const eventData = {
+        name: $('#eventName').val(),
+        kind: $('#eventKind').val(),
+        date: $('#eventDate').val(),
+        description: $('#eventDescription').val()
+      };
+
+      if (eventData.name === "" || eventData.kind === "" || eventData.date === "") {
+        showToast('Compila i campi obbligatori', 'danger');
+        return;
+      }
+
+      $.ajax({
+        url: '/events',
+        method: 'POST',
+        data: eventData,
+        success: function(response) {
+          showToast('Evento salvato!', 'success');
+          $('#createEventModal').modal('hide');
+        },
+        error: function(error) {
+          showToast('Errore salvataggio', 'danger');
+        }
+      });
+    });
+  });
+</script>
