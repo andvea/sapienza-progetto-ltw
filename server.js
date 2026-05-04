@@ -157,7 +157,8 @@ app.get('/admin/:page', async function(req, res){
 app.get('/settings', async function(req, res){
   var customer = new Customer(req.AUTH_MIDDLEWARE.userInfo.userId);
   await customerRepository.getSettings(customer);
-  return res.status(200).send(customer.getSettings());
+  var customerSettings = (customer.getSettings() ? customer.getSettings() : {});
+  return res.status(200).send(customerSettings);
 });
 
 app.post('/settings/:entity', async function(req, res){
