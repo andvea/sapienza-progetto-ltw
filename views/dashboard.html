@@ -73,7 +73,7 @@
     >
       <nav 
         class="d-flex flex-grow-0 flex-shrink-0 p-3 flex-column w-100" 
-        style="max-width: 280px; background: #ebebeb; border-top-left-radius: inherit;"
+        style="max-width: 240px; background: #ebebeb; border-top-left-radius: inherit;"
       >
         <ul class="main-nav nav nav-pills flex-column mb-auto">
           <li class="nav-item">
@@ -206,6 +206,19 @@
   <script src="/static/toastHelper.js"></script>
 
   <script type="text/javascript">
+    function formatDateTime(datetime = '') {
+      const date = new Date(datetime);
+
+      return date.toLocaleString('it-IT', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
     class PageLoader{
       constructor(){
         this.URL_BASE_DIR = '/admin';

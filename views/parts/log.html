@@ -17,10 +17,10 @@
     border-bottom-right-radius: inherit;
   }
 
-  .ltw-table-row > div[data-ltw-col="id"]{ flex: 100px 0 0; }
-  .ltw-table-row > div[data-ltw-col="type"]{ flex: 200px 0 0; }
-  .ltw-table-row > div[data-ltw-col="desc"]{ flex: auto 1 0; }
-  .ltw-table-row > div[data-ltw-col="date"]{ flex: 200px 0 0; }
+  .ltw-table-row > div[data-ltw-col="type"]{ flex: 120px 0 0; }
+  .ltw-table-row > div[data-ltw-col="customerName"]{ flex: 200px 0 0; }
+  .ltw-table-row > div[data-ltw-col="ref"]{ flex: auto 1 0; }
+  .ltw-table-row > div[data-ltw-col="datetime"]{ flex: 200px 0 0; }
   .ltw-table-row > div[data-ltw-col="action"]{ flex: 100px 0 0; }
 </style>
 
@@ -37,23 +37,38 @@
     </div>
   </div>
 
-  <form class="d-flex mt-3 mb-5 gap-4" style="max-width: 60%;">
-    <div class="d-flex flex-grow-1 align-items-center gap-3">
-      <label for="dateFrom" class="form-label mb-0">Dal</label>
-      <input type="date" class="form-control flex-grow-1" id="dateFrom" placeholder="Dal">
+  <form class="d-flex mt-3 mb-5 gap-4" style="max-width: 80%;">
+    <div class="d-flex flex-grow-1 align-items-center gap-3 form-floating">
+      <input type="datetime-local" class="form-control flex-grow-1" id="datetimeFrom">
+      <label for="datetimeFrom" class="form-label mb-0">Dal</label>
     </div>
-    <div class="d-flex flex-grow-1 align-items-center gap-3">
-      <label for="dateTo" class="form-label mb-0">Al</label>
-      <input type="date" class="form-control flex-grow-1" id="dateTo" placeholder="Dal">
+    <div class="d-flex flex-grow-1 align-items-center gap-3 form-floating">
+      <input type="datetime-local" class="form-control flex-grow-1" id="datetimeTo">
+      <label for="datetimeTo" class="form-label mb-0">Al</label>
+    </div>
+    <div class="d-flex flex-grow-1 align-items-center gap-3 form-floating">
+      <select class="form-select" id="eventType" aria-label="Default select example">
+        <option value="Tutti">Tutti</option>
+        <option value="Sereno">Sereno</option>
+        <option value="Nuvoloso">Nuvoloso</option>
+        <option value="Pioggia">Pioggia</option>
+        <option value="Temporale">Temporale</option>
+        <option value="Nebbia">Nebbia</option>
+        <option value="Neve">Neve</option>
+      </select>
+      <label for="eventType">Tipologia</label>
+    </div>
+    <div class="d-flex flex-grow-1 align-items-center gap-3 form-floating">
+      <a href="javascript:clearFilters()" class="text-decoration-none">Cancella</a>
     </div>
   </form>
 
   <div class="d-flex flex-column rounded-3 bg-white border border-secondary-subtle">
     <div class="d-flex flex-grow-1 ltw-table-header ltw-table-row">
-      <div data-ltw-col="id">ID</div>
       <div data-ltw-col="type">Tipo</div>
-      <div data-ltw-col="desc">Descrizione</div>
-      <div data-ltw-col="date">Data</div>
+      <div data-ltw-col="customerName">Autore</div>
+      <div data-ltw-col="ref">Riferimento</div>
+      <div data-ltw-col="datetime">Data</div>
       <div data-ltw-col="action">Azioni</div>
     </div>
 
@@ -77,23 +92,41 @@
 </div><!-- end container -->
 
 <script type="text/javascript">
+  function clearFilters(){
+    $('#datetimeFrom, #datetimeTo').val('');
+    $('#eventType').val('Tutti');
+    loadEvents();
+  }
+
   function loadEvents(queryString = ''){
+    var datetimeFrom = $('#datetimeFrom').val();
+    var datetimeTo = $('#datetimeTo').val();
+    var type = $('#eventType').val();
+
+    const params = new URLSearchParams(queryString);
+
+    if (datetimeFrom){ params.append('datetimeFrom', datetimeFrom); }
+    if (datetimeTo){ params.append('datetimeTo', datetimeTo); }
+    if (type){ params.append('type', type); }
+
+    queryString = params.toString() ? '?' + params.toString() : '';
+
     fetch('/events'+queryString)
       .then(response => response.json())
       .then(events => {
+        $('.ltw-table-body').empty();
+
         if (!events.events.length) {
           return;
-        }
-
-        $('.ltw-table-body').empty();
+        }        
 
         events.events.forEach((event) => {
           $('.ltw-table-body').append(`
             <div class="d-flex ltw-table-row flex-grow-1">
-              <div data-ltw-col="id">${event.id}</div>
-              <div data-ltw-col="type">${event.name}</div>
-              <div data-ltw-col="desc">${event.description}</div>
-              <div data-ltw-col="date">${event.datetime}</div>
+              <div data-ltw-col="type">${event.type}</div>
+              <div data-ltw-col="customerName">${event.customerName}</div>
+              <div data-ltw-col="ref">Nome: ${event.name}<br/>Descrizione: ${event.description}</div>
+              <div data-ltw-col="datetime">${formatDateTime(event.datetime)}</div>
               <div data-ltw-col="action"></div>
             </div>`);
         });
@@ -110,34 +143,40 @@
   }
 
   $(document).ready(function() {
-    loadEvents();
-
-    $('#createEventModal .btn-primary').on('click', function() {
-      const eventData = {
-        name: $('#eventName').val(),
-        type: $('#eventType').val(),
-        datetime: $('#eventDatetime').val(),
-        description: $('#eventDescription').val()
-      };
-
-      if (eventData.name === "" || eventData.type === "" || eventData.date === "") {
-        showToast('Compila i campi obbligatori', 'danger');
-        return;
-      }
-
-      $.ajax({
-        url: '/events',
-        method: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify(eventData),
-        success: function(response) {
-          showToast('Evento salvato!', 'success');
-          $('#createEventModal').modal('hide');
-        },
-        error: function(error) {
-          showToast('Errore salvataggio', 'danger');
-        }
-      });
+    $('#datetimeFrom, #datetimeTo, #eventType').on('change', function() {
+      loadEvents();
     });
+
+    $(document)
+      .off('click', '#createEventModal .btn-primary')
+      .on('click', '#createEventModal .btn-primary', function() {
+        const eventData = {
+          name: $('#createEventModal #eventName').val(),
+          type: $('#createEventModal #eventType').val(),
+          datetime: $('#createEventModal #eventDatetime').val(),
+          description: $('#createEventModal #eventDescription').val()
+        };
+
+        if (eventData.name === "" || eventData.type === "" || eventData.date === "") {
+          showToast('Compila i campi obbligatori', 'danger');
+          return;
+        }
+
+        $.ajax({
+          url: '/events',
+          method: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify(eventData),
+          success: function(response) {
+            showToast('Evento salvato!', 'success');
+            $('#createEventModal').modal('hide');
+          },
+          error: function(error) {
+            showToast('Errore salvataggio', 'danger');
+          }
+        });
+    });
+
+    loadEvents();
   });
 </script>

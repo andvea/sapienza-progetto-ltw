@@ -185,6 +185,7 @@ app.post('/settings/:entity', async function(req, res){
 app.get('/events', async function(req, res){
   let prevCursor = ((req.query.prevCursor ) ? Buffer.from(req.query.prevCursor, 'base64').toString('utf8') : null);
   let nextCursor = ((req.query.nextCursor ) ? Buffer.from(req.query.nextCursor, 'base64').toString('utf8') : null);
+  req.query.type = (req.query.type=='Tutti' ? null : req.query.type);
 
   var customer = new Customer(req.AUTH_MIDDLEWARE.userInfo.userId);
   await customerRepository.getSettings(customer);
@@ -198,7 +199,9 @@ app.get('/events', async function(req, res){
   let JSONres = [];
 
   try {
-    events = await weatherEventRepository.list(listMyOwn, prevCursor, nextCursor, 20);
+    events = 
+      await weatherEventRepository.list(listMyOwn, prevCursor, nextCursor, 20,
+          req.query.datetimeFrom, req.query.datetimeTo, req.query.type);
   } catch (err) {
     let errCode = (err.cause && err.cause.errorCode ? err.cause.errorCode : 500);
     return res.status(errCode).send('An error occurred');
@@ -210,7 +213,8 @@ app.get('/events', async function(req, res){
       customerName: `${events[i].getCustomer().getFirstName()} ${events[i].getCustomer().getLastName()}`,
       name: events[i].getName(),
       type: events[i].getType(),
-      datetime: events[i].getDatetime()
+      datetime: events[i].getDatetime(),
+      description: events[i].getDescription()
     });
   }
 

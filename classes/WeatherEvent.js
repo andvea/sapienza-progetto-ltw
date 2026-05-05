@@ -81,7 +81,8 @@ export class WeatherEventRepository {
     }
   }
 
-  async list(customer = null, prevCursor = null, nextCursor = null, limit = 20) {
+  async list(customer = null, prevCursor = null, nextCursor = null, limit = 20,
+      datetimeFrom = null, datetimeTo = null, type = null) {
     try {
       const customerRepository = new CustomerRepository(this.mySqlPool);
 
@@ -103,11 +104,26 @@ export class WeatherEventRepository {
         params.push(customer.getId());
       }
 
+      if (datetimeFrom) {
+        where.push('datetime >= STR_TO_DATE(?, "%Y-%m-%dT%H:%i")');
+        params.push(datetimeFrom);
+      }
+
+      if (datetimeTo) {
+        where.push('datetime <= STR_TO_DATE(?, "%Y-%m-%dT%H:%i")');
+        params.push(datetimeTo);
+      }
+
+      if (type) {
+        where.push('type = ?');
+        params.push(type);
+      }
+
       const query = `
         SELECT *
         FROM ${global.ENV.DATABASE_EVENTS_TABLE}
         ${where.length ? 'WHERE ' + where.join(' AND ') : ''}
-        ORDER BY local_id ASC
+        ORDER BY datetime ASC
         LIMIT ?`;
 
       params.push(limit);
@@ -118,8 +134,10 @@ export class WeatherEventRepository {
       for (var i=0; i<res[0].length; i++) {
         let row = res[0][i];
         let eventCustomer = await customerRepository.get(row.customer_local_id);
-        events.push(new WeatherEvent(row.local_id, eventCustomer, row.name, 
-            row.type, row.datetime));
+        let event = new WeatherEvent(row.local_id, eventCustomer, row.name, 
+            row.type, row.datetime);
+        event.setDescription(row.description);
+        events.push(event);
       }
 
       return events;
