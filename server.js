@@ -8,6 +8,7 @@ import mysql from 'mysql2/promise';
 
 import {Authentication} from './classes/Authentication.js';
 import {Customer, CustomerRepository} from './classes/Customer.js';
+import {WeatherEvent, WeatherEventRepository} from './classes/WeatherEvent.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -26,6 +27,7 @@ var mysqlPool = mysql.createPool({
 });
 
 const customerRepository = new CustomerRepository(mysqlPool);
+const weatherEventRepository = new WeatherEventRepository(mysqlPool);
 const authentication = new Authentication();
 
 app.use(express.urlencoded({ extended: true }));
@@ -180,6 +182,21 @@ app.post('/settings/:entity', async function(req, res){
   }
 });
 
-app.post('/events', function(req, res){
-  return res.sendStatus(200);
+app.post('/events', async function(req, res){
+  var customer = new Customer(req.AUTH_MIDDLEWARE.userInfo.userId);
+
+  if (!req.body.name || !req.body.type || !req.body.datetime) {
+    return res.status(400).send('Missing required fields');
+  }
+
+  var event = new WeatherEvent(null, customer, req.body.name, req.body.type, req.body.datetime);
+  event.setDescription(req.body.description);
+
+  try{
+    await weatherEventRepository.create(event);
+    return res.sendStatus(200);
+  } catch(err) {
+    let errCode = (err.cause && err.cause.errorCode ? err.cause.errorCode : 500);
+    return res.status(errCode).send('An error occurred');
+  }
 })

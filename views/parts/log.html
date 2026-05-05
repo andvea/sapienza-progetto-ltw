@@ -18,7 +18,7 @@
   }
 
   .ltw-table-row > div[data-ltw-col="id"]{ flex: 100px 0 0; }
-  .ltw-table-row > div[data-ltw-col="kind"]{ flex: 200px 0 0; }
+  .ltw-table-row > div[data-ltw-col="type"]{ flex: 200px 0 0; }
   .ltw-table-row > div[data-ltw-col="desc"]{ flex: auto 1 0; }
   .ltw-table-row > div[data-ltw-col="date"]{ flex: 200px 0 0; }
   .ltw-table-row > div[data-ltw-col="action"]{ flex: 100px 0 0; }
@@ -51,7 +51,7 @@
   <div class="d-flex flex-column rounded-3 bg-white border border-secondary-subtle">
     <div class="d-flex flex-grow-1 ltw-table-header ltw-table-row">
       <div data-ltw-col="id">ID</div>
-      <div data-ltw-col="kind">Tipo</div>
+      <div data-ltw-col="type">Tipo</div>
       <div data-ltw-col="desc">Descrizione</div>
       <div data-ltw-col="date">Data</div>
       <div data-ltw-col="action">Azioni</div>
@@ -59,21 +59,21 @@
 
     <div class="d-flex ltw-table-row flex-grow-1">
       <div data-ltw-col="id">1</div>
-      <div data-ltw-col="kind">Pioggia</div>
+      <div data-ltw-col="type">Pioggia</div>
       <div data-ltw-col="desc"></div>
       <div data-ltw-col="date">2 luglio 2012</div>
       <div data-ltw-col="action"></div>
     </div>
     <div class="d-flex ltw-table-row flex-grow-1">
       <div data-ltw-col="id">1</div>
-      <div data-ltw-col="kind">Pioggia</div>
+      <div data-ltw-col="type">Pioggia</div>
       <div data-ltw-col="desc"></div>
       <div data-ltw-col="date">2 luglio 2012</div>
       <div data-ltw-col="action"></div>
     </div>
     <div class="d-flex ltw-table-row flex-grow-1">
       <div data-ltw-col="id">1</div>
-      <div data-ltw-col="kind">Pioggia</div>
+      <div data-ltw-col="type">Pioggia</div>
       <div data-ltw-col="desc"></div>
       <div data-ltw-col="date">2 luglio 2012</div>
       <div data-ltw-col="action"></div>
@@ -104,12 +104,12 @@
     $('#createEventModal .btn-primary').on('click', function() {
       const eventData = {
         name: $('#eventName').val(),
-        kind: $('#eventKind').val(),
-        date: $('#eventDate').val(),
+        type: $('#eventType').val(),
+        datetime: $('#eventDatetime').val(),
         description: $('#eventDescription').val()
       };
 
-      if (eventData.name === "" || eventData.kind === "" || eventData.date === "") {
+      if (eventData.name === "" || eventData.type === "" || eventData.date === "") {
         showToast('Compila i campi obbligatori', 'danger');
         return;
       }
@@ -117,7 +117,8 @@
       $.ajax({
         url: '/events',
         method: 'POST',
-        data: eventData,
+        contentType: 'application/json',
+        data: JSON.stringify(eventData),
         success: function(response) {
           showToast('Evento salvato!', 'success');
           $('#createEventModal').modal('hide');
