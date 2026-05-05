@@ -182,6 +182,49 @@ app.post('/settings/:entity', async function(req, res){
   }
 });
 
+app.get('/events', async function(req, res){
+  let prevCursor = ((req.query.prevCursor ) ? Buffer.from(req.query.prevCursor, 'base64').toString('utf8') : null);
+  let nextCursor = ((req.query.nextCursor ) ? Buffer.from(req.query.nextCursor, 'base64').toString('utf8') : null);
+
+  var customer = new Customer(req.AUTH_MIDDLEWARE.userInfo.userId);
+  await customerRepository.getSettings(customer);
+  var customerSettings = (customer.getSettings() ? customer.getSettings() : {});
+
+  let listMyOwn = (customerSettings.events && customerSettings.events.listMyOwn
+      ? customer
+      : null);
+  
+  let events = [];
+  let JSONres = [];
+
+  try {
+    events = await weatherEventRepository.list(listMyOwn, prevCursor, nextCursor, 20);
+  } catch (err) {
+    let errCode = (err.cause && err.cause.errorCode ? err.cause.errorCode : 500);
+    return res.status(errCode).send('An error occurred');
+  }
+
+  for (var i=0; i<events.length; i++) {
+    JSONres.push({
+      id: events[i].getId(),
+      customerName: `${events[i].getCustomer().getFirstName()} ${events[i].getCustomer().getLastName()}`,
+      name: events[i].getName(),
+      type: events[i].getType(),
+      datetime: events[i].getDatetime()
+    });
+  }
+
+  return res.status(200).send({
+    prevCursor: JSONres.length
+      ? Buffer.from(JSONres[0].id.toString()).toString('base64')
+      : null,
+    nextCursor: JSONres.length
+      ? Buffer.from(JSONres[JSONres.length - 1].id.toString()).toString('base64')
+      : null,
+    events: JSONres
+  });
+});
+
 app.post('/events', async function(req, res){
   var customer = new Customer(req.AUTH_MIDDLEWARE.userInfo.userId);
 

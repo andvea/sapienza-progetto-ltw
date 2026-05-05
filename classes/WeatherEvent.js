@@ -1,3 +1,5 @@
+import {Customer, CustomerRepository} from './Customer.js';
+
 export class WeatherEvent {
   constructor(id, customer, name, type, datetime) {
     this.id = id;
@@ -70,6 +72,58 @@ export class WeatherEventRepository {
 
       return event;
     } catch(dbError) {
+      throw new Error((dbError.message ? dbError.message : 'An error occurred with db'), {
+        cause: {
+          errorCode: (dbError.cause && dbError.cause.errorCode ? dbError.cause.errorCode : 500),
+          originError: dbError
+        }
+      });
+    }
+  }
+
+  async list(customer = null, prevCursor = null, nextCursor = null, limit = 20) {
+    try {
+      const customerRepository = new CustomerRepository(this.mySqlPool);
+
+      let where = [];
+      let params = [];
+
+      if (nextCursor) {
+        where.push('local_id > ?');
+        params.push(nextCursor);
+      }
+
+      if (prevCursor) {
+        where.push('local_id < ?');
+        params.push(prevCursor);
+      }
+
+      if (customer) {
+        where.push('customer_local_id = ?');
+        params.push(customer.getId());
+      }
+
+      const query = `
+        SELECT *
+        FROM ${global.ENV.DATABASE_EVENTS_TABLE}
+        ${where.length ? 'WHERE ' + where.join(' AND ') : ''}
+        ORDER BY local_id ASC
+        LIMIT ?`;
+
+      params.push(limit);
+
+      const res = await this.mySqlPool.query(query, params);
+      var events = [];
+
+      for (var i=0; i<res[0].length; i++) {
+        let row = res[0][i];
+        let eventCustomer = await customerRepository.get(row.customer_local_id);
+        events.push(new WeatherEvent(row.local_id, eventCustomer, row.name, 
+            row.type, row.datetime));
+      }
+
+      return events;
+    } catch (dbError) {
       throw new Error((dbError.message ? dbError.message : 'An error occurred with db'), {
         cause: {
           errorCode: (dbError.cause && dbError.cause.errorCode ? dbError.cause.errorCode : 500),

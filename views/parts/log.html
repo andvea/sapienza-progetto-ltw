@@ -57,33 +57,13 @@
       <div data-ltw-col="action">Azioni</div>
     </div>
 
-    <div class="d-flex ltw-table-row flex-grow-1">
-      <div data-ltw-col="id">1</div>
-      <div data-ltw-col="type">Pioggia</div>
-      <div data-ltw-col="desc"></div>
-      <div data-ltw-col="date">2 luglio 2012</div>
-      <div data-ltw-col="action"></div>
-    </div>
-    <div class="d-flex ltw-table-row flex-grow-1">
-      <div data-ltw-col="id">1</div>
-      <div data-ltw-col="type">Pioggia</div>
-      <div data-ltw-col="desc"></div>
-      <div data-ltw-col="date">2 luglio 2012</div>
-      <div data-ltw-col="action"></div>
-    </div>
-    <div class="d-flex ltw-table-row flex-grow-1">
-      <div data-ltw-col="id">1</div>
-      <div data-ltw-col="type">Pioggia</div>
-      <div data-ltw-col="desc"></div>
-      <div data-ltw-col="date">2 luglio 2012</div>
-      <div data-ltw-col="action"></div>
-    </div>
+    <div class="ltw-table-body"></div>
 
     <div class="d-flex flex-grow-1 align-items-center gap-2 ltw-table-footer">
       <div style="flex: auto 0 0;">
         <nav aria-label="...">
           <ul class="pagination" style="margin: 0;">
-            <li class="page-item disabled">
+            <li class="page-item">
               <a class="page-link"><</a>
             </li>
             <li class="page-item">
@@ -92,15 +72,46 @@
           </ul>
         </nav>
       </div>
-      <div style="flex: auto 0 0;">
-        <p style="margin: 0;">1-50</p>
-      </div>
     </div>
   </div>
 </div><!-- end container -->
 
 <script type="text/javascript">
+  function loadEvents(queryString = ''){
+    fetch('/events'+queryString)
+      .then(response => response.json())
+      .then(events => {
+        if (!events.events.length) {
+          return;
+        }
+
+        $('.ltw-table-body').empty();
+
+        events.events.forEach((event) => {
+          $('.ltw-table-body').append(`
+            <div class="d-flex ltw-table-row flex-grow-1">
+              <div data-ltw-col="id">${event.id}</div>
+              <div data-ltw-col="type">${event.name}</div>
+              <div data-ltw-col="desc">${event.description}</div>
+              <div data-ltw-col="date">${event.datetime}</div>
+              <div data-ltw-col="action"></div>
+            </div>`);
+        });
+
+        $('.page-container').animate({ scrollTop: 0 }, 300);
+        $('.pagination .page-item:first .page-link')
+            .attr('href', 'javascript:loadEvents("?prevCursor='+events.prevCursor+'")');
+        $('.pagination .page-item:last .page-link')
+            .attr('href', 'javascript:loadEvents("?nextCursor='+events.nextCursor+'")');
+      })
+      .catch(error => {
+        showToast('Errore recupero eventi', 'danger');
+      });
+  }
+
   $(document).ready(function() {
+    loadEvents();
+
     $('#createEventModal .btn-primary').on('click', function() {
       const eventData = {
         name: $('#eventName').val(),
