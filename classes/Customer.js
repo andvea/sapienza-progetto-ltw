@@ -70,6 +70,37 @@ export class CustomerRepository {
     this.mySqlPool = mySqlPool;
   }
 
+  async get(local_id) {
+    try {
+      var customerFromDb = await this.mySqlPool.query(`
+        SELECT * 
+        FROM ${global.ENV.DATABASE_CUSTOMERS_TABLE} 
+        WHERE local_id = ? 
+        LIMIT 1`,
+        [local_id]);
+
+      if (customerFromDb[0].length==1) {
+        var c = new Customer(customerFromDb[0][0].local_id);
+        c.setEmail(customerFromDb[0][0].email);
+        c.setFirstName(customerFromDb[0][0].first_name);
+        c.setLastName(customerFromDb[0][0].last_name);
+        c.setProfilePic(customerFromDb[0][0].profile_pic);
+
+        return c;
+      } else {
+        return null;
+      }
+
+    } catch(dbError) {
+      throw new Error('Can\'t find customer', {
+        cause: {
+          errorCode: 500, 
+          originError: dbError
+        }
+      });
+    }
+  }
+
   async find(email = null, pwd = null) {
     try {
       var customerFromDb = await this.mySqlPool.query(`

@@ -8,6 +8,7 @@ import mysql from 'mysql2/promise';
 
 import {Authentication} from './classes/Authentication.js';
 import {Customer, CustomerRepository} from './classes/Customer.js';
+import {WeatherEvent, WeatherEventRepository} from './classes/WeatherEvent.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -26,6 +27,7 @@ var mysqlPool = mysql.createPool({
 });
 
 const customerRepository = new CustomerRepository(mysqlPool);
+const weatherEventRepository = new WeatherEventRepository(mysqlPool);
 const authentication = new Authentication();
 
 app.use(express.urlencoded({ extended: true }));
@@ -43,7 +45,7 @@ app.use((req, res, next) => {
   );
   next();
 });
-app.use('/static', express.static('/static'));
+app.use('/static', express.static('static'));
 
 const port = process.env.PORT || 8080;
 const server = app.listen(port, 'localhost');
@@ -174,6 +176,95 @@ app.post('/settings/:entity', async function(req, res){
         return res.status(400).send('This entity doesn\'t exists');
         break;
     }
+  } catch(err) {
+    let errCode = (err.cause && err.cause.errorCode ? err.cause.errorCode : 500);
+    return res.status(errCode).send('An error occurred');
+  }
+});
+
+app.get('/events', async function(req, res){
+  let prevCursor = ((req.query.prevCursor ) ? Buffer.from(req.query.prevCursor, 'base64').toString('utf8') : null);
+  let nextCursor = ((req.query.nextCursor ) ? Buffer.from(req.query.nextCursor, 'base64').toString('utf8') : null);
+  req.query.type = (req.query.type=='Tutti' ? null : req.query.type);
+
+  var customer = new Customer(req.AUTH_MIDDLEWARE.userInfo.userId);
+  await customerRepository.getSettings(customer);
+  var customerSettings = (customer.getSettings() ? customer.getSettings() : {});
+
+  let listMyOwn = (customerSettings.events && customerSettings.events.listMyOwn
+      ? customer
+      : null);
+  
+  let events = [];
+  let JSONres = [];
+
+  try {
+    events = 
+      await weatherEventRepository.list(listMyOwn, prevCursor, nextCursor, 20,
+          req.query.datetimeFrom, req.query.datetimeTo, req.query.type);
+  } catch (err) {
+    let errCode = (err.cause && err.cause.errorCode ? err.cause.errorCode : 500);
+    return res.status(errCode).send('An error occurred');
+  }
+
+  for (var i=0; i<events.length; i++) {
+    JSONres.push({
+      id: events[i].getId(),
+      customerName: `${events[i].getCustomer().getFirstName()} ${events[i].getCustomer().getLastName()}`,
+      name: events[i].getName(),
+      type: events[i].getType(),
+      datetime: events[i].getDatetime(),
+      description: events[i].getDescription()
+    });
+  }
+
+  return res.status(200).send({
+    prevCursor: JSONres.length
+      ? Buffer.from(JSONres[0].id.toString()).toString('base64')
+      : null,
+    nextCursor: JSONres.length
+      ? Buffer.from(JSONres[JSONres.length - 1].id.toString()).toString('base64')
+      : null,
+    events: JSONres
+  });
+});
+
+app.post('/events', async function(req, res){
+  var customer = new Customer(req.AUTH_MIDDLEWARE.userInfo.userId);
+
+  if (!req.body.name || !req.body.type || !req.body.datetime) {
+    return res.status(400).send('Missing required fields');
+  }
+
+  var event = new WeatherEvent(null);
+  event.setCustomer(customer);
+  event.setName(req.body.name);
+  event.setType(req.body.type);
+  event.setDatetime(req.body.datetime);
+  event.setDescription(req.body.description);
+
+  try{
+    await weatherEventRepository.create(event);
+    return res.sendStatus(200);
+  } catch(err) {
+    let errCode = (err.cause && err.cause.errorCode ? err.cause.errorCode : 500);
+    return res.status(errCode).send('An error occurred');
+  }
+});
+
+app.post('/events/delete/:id', async function(req, res){
+  var customer = new Customer(req.AUTH_MIDDLEWARE.userInfo.userId);
+  var event = new WeatherEvent(req.params.id);
+
+  try{
+    event = await weatherEventRepository.get(event);
+
+    if (event.getCustomer().getId()!=customer.getId()){
+      return res.sendStatus(401);
+    }
+
+    await weatherEventRepository.delete(event);
+    return res.sendStatus(200);
   } catch(err) {
     let errCode = (err.cause && err.cause.errorCode ? err.cause.errorCode : 500);
     return res.status(errCode).send('An error occurred');
