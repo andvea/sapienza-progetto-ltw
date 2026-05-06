@@ -236,7 +236,11 @@ app.post('/events', async function(req, res){
     return res.status(400).send('Missing required fields');
   }
 
-  var event = new WeatherEvent(null, customer, req.body.name, req.body.type, req.body.datetime);
+  var event = new WeatherEvent(null);
+  event.setCustomer(customer);
+  event.setName(req.body.name);
+  event.setType(req.body.type);
+  event.setDatetime(req.body.datetime);
   event.setDescription(req.body.description);
 
   try{
@@ -246,4 +250,23 @@ app.post('/events', async function(req, res){
     let errCode = (err.cause && err.cause.errorCode ? err.cause.errorCode : 500);
     return res.status(errCode).send('An error occurred');
   }
-})
+});
+
+app.post('/events/delete/:id', async function(req, res){
+  var customer = new Customer(req.AUTH_MIDDLEWARE.userInfo.userId);
+  var event = new WeatherEvent(req.params.id);
+
+  try{
+    event = await weatherEventRepository.get(event);
+
+    if (event.getCustomer().getId()!=customer.getId()){
+      return res.sendStatus(401);
+    }
+
+    await weatherEventRepository.delete(event);
+    return res.sendStatus(200);
+  } catch(err) {
+    let errCode = (err.cause && err.cause.errorCode ? err.cause.errorCode : 500);
+    return res.status(errCode).send('An error occurred');
+  }
+});

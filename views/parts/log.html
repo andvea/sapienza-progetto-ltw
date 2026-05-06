@@ -2,6 +2,7 @@
   .ltw-table-row{
     border-bottom: 1px solid #ddd; 
     padding: .6rem 1rem; 
+    gap: 1rem;
   }
 
   .ltw-table-header{
@@ -21,7 +22,7 @@
   .ltw-table-row > div[data-ltw-col="customerName"]{ flex: 200px 0 0; }
   .ltw-table-row > div[data-ltw-col="ref"]{ flex: auto 1 0; }
   .ltw-table-row > div[data-ltw-col="datetime"]{ flex: 200px 0 0; }
-  .ltw-table-row > div[data-ltw-col="action"]{ flex: 100px 0 0; }
+  .ltw-table-row > div[data-ltw-col="action"]{ flex: 100px 0 0; text-align: center; }
 </style>
 
 <div class="container p-0">
@@ -69,7 +70,7 @@
       <div data-ltw-col="customerName">Autore</div>
       <div data-ltw-col="ref">Riferimento</div>
       <div data-ltw-col="datetime">Data</div>
-      <div data-ltw-col="action">Azioni</div>
+      <div data-ltw-col="action"></div>
     </div>
 
     <div class="ltw-table-body"></div>
@@ -98,6 +99,21 @@
     loadEvents();
   }
 
+  function deleteEvent(id){
+    $.ajax({
+      url: '/events/delete/'+id,
+      method: 'POST',
+      contentType: 'application/json',
+      success: function(response) {
+        showToast('Evento cancellato!', 'success');
+        $('[data-ltw-event-id="'+id+'"]').remove();
+      },
+      error: function(error) {
+        showToast('Impossibile eliminare l\'evento', 'danger');
+      }
+    });
+  }
+
   function loadEvents(queryString = ''){
     var datetimeFrom = $('#datetimeFrom').val();
     var datetimeTo = $('#datetimeTo').val();
@@ -122,12 +138,14 @@
 
         events.events.forEach((event) => {
           $('.ltw-table-body').append(`
-            <div class="d-flex ltw-table-row flex-grow-1">
+            <div class="d-flex ltw-table-row flex-grow-1" data-ltw-event-id="${event.id}">
               <div data-ltw-col="type">${event.type}</div>
               <div data-ltw-col="customerName">${event.customerName}</div>
               <div data-ltw-col="ref">Nome: ${event.name}<br/>Descrizione: ${event.description}</div>
               <div data-ltw-col="datetime">${formatDateTime(event.datetime)}</div>
-              <div data-ltw-col="action"></div>
+              <div data-ltw-col="action">
+                <a href="javascript:deleteEvent(${event.id})"><i class="bi bi-trash3"></i></a>
+              </div>
             </div>`);
         });
 
