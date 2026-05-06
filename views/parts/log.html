@@ -130,11 +130,12 @@
     fetch('/events'+queryString)
       .then(response => response.json())
       .then(events => {
-        $('.ltw-table-body').empty();
-
         if (!events.events.length) {
+          showToast('Nessun evento trovato', 'warning');
           return;
-        }        
+        }
+
+        $('.ltw-table-body').empty();
 
         events.events.forEach((event) => {
           $('.ltw-table-body').append(`
