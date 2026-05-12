@@ -1,8 +1,58 @@
-<!DOCTYPE html>
-<html>
-<body>
+<div class="container p-0" style="max-width: 900px;">
+  <h4>Impostazioni</h4>
+  
+  <div class="d-flex flex-grow-1 flex-shrink-1 mt-3 slide flex-column">
+    <h6 class="d-flex">Account</h6>
+    <div class="d-flex flex-grow-1 flex-shrink-1 mt-2 gap-3 flex-column">
+      <div class="d-flex flex-grow-1 align-items-center gap-3 form-floating">
+        <input type="text" class="form-control flex-grow-1" id="accountFirstName">
+        <label for="accountFirstName" class="form-label mb-0">Nome</label>
+      </div>
+      <div class="d-flex flex-grow-1 align-items-center gap-3 form-floating">
+        <input type="text" class="form-control flex-grow-1" id="accountLastName">
+        <label for="accountLastName" class="form-label mb-0">Cognome</label>
+      </div>
+    </div>
+    <button type="button" class="d-flex align-self-start btn btn-outline-primary btn-sm mt-3">Salva</button>
+  </div>
+  
+  <div class="d-flex flex-grow-1 flex-shrink-1 mt-3 slide flex-column">
+    <h6 class="d-flex">Password</h6>
+    <div class="d-flex flex-grow-1 flex-shrink-1 mt-2 gap-3 flex-column">
+      <div class="d-flex flex-grow-1 align-items-center gap-3 form-floating">
+        <input type="password" class="form-control flex-grow-1" id="changePwdOld">
+        <label for="changePwdOld" class="form-label mb-0">Vecchia password</label>
+      </div>
+      <div class="d-flex flex-grow-1 align-items-center gap-3 form-floating">
+        <input type="password" class="form-control flex-grow-1" id="changePwdNew">
+        <label for="changePwdOld" class="form-label mb-0">Nuova password</label>
+      </div>
+      <div class="d-flex flex-grow-1 align-items-center gap-3 form-floating">
+        <input type="password" class="form-control flex-grow-1" id="changePwdNewConfirm">
+        <label for="changePwdNewConfirm" class="form-label mb-0">Conferma nuova password</label>
+      </div>
+    </div>
+    <button type="button" class="d-flex align-self-start btn btn-outline-primary btn-sm mt-3">Salva</button>
+  </div>
 
-<p>Pagina impostazioni</p>
-
-</body>
-</html>
+  <div class="d-flex flex-grow-1 flex-shrink-1 mt-3 slide flex-column">
+    <h6 class="d-flex">Grafici</h6>
+    <div class="d-flex flex-grow-1 flex-shrink-1 mt-2 gap-3">
+      <div class="d-flex flex-grow-1 align-items-center gap-3 form-floating">
+        <select class="form-select" id="eventsPropertyOnCharts" aria-label="Default select example">
+          <option value="tutti">Tutti</option>
+          <option value="miei">Solo miei</option>
+        </select>
+        <label for="eventsPropertyOnCharts">Mostra eventi</label>
+      </div>
+      <div class="d-flex flex-grow-1 align-items-center gap-3 form-floating">
+        <select class="form-select" id="rememberChartsSize" aria-label="Default select example">
+          <option value="true">Ricorda preferenze</option>
+          <option value="false">Dimentica</option>
+        </select>
+        <label for="rememberChartsSize">Dimensione e disposizione</label>
+      </div>
+    </div>
+    <button type="button" class="d-flex align-self-start btn btn-outline-primary btn-sm mt-3">Salva</button>
+  </div>
+</div><!-- end container -->
