@@ -169,7 +169,25 @@ app.post('/settings/:entity', async function(req, res){
   try {
     switch (req.params.entity) {
       case 'charts':
+      case 'chartsPreferences':
         await customerRepository.saveSetting(customer, req.params.entity, JSON.stringify(req.body));
+        return res.sendStatus(200);
+        break;
+      case 'changePassword':
+        if ((!req.body.oldPwd || !req.body.newPwd || !req.body.confirmNewPwd) ||
+            (req.body.newPwd != req.body.confirmNewPwd)) {
+          return res.sendStatus(400);
+        }
+        await customerRepository.updateProperty(customer, 'pwd', req.body.newPwd, `pwd = '${req.body.oldPwd}'`);
+        return res.sendStatus(200);
+        break;
+      case 'customerData':
+        if (!req.body.firstName || !req.body.lastName || !req.body.email) {
+          return res.sendStatus(400);
+        }
+        await customerRepository.updateProperty(customer, 'first_name', req.body.firstName);
+        await customerRepository.updateProperty(customer, 'last_name', req.body.lastName);
+        await customerRepository.updateProperty(customer, 'email', req.body.email);
         return res.sendStatus(200);
         break;
       default:

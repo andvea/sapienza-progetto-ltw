@@ -1,7 +1,7 @@
 <div class="container p-0" style="max-width: 900px;">
   <h4>Impostazioni</h4>
   
-  <div class="d-flex flex-grow-1 flex-shrink-1 mt-3 slide flex-column">
+  <div class="d-flex flex-grow-1 flex-shrink-1 mt-3 slide flex-column" data-ltw-settings="customerData">
     <h6 class="d-flex">Account</h6>
     <div class="d-flex flex-grow-1 flex-shrink-1 mt-2 gap-3 flex-column">
       <div class="d-flex flex-grow-1 align-items-center gap-3 form-floating">
@@ -12,11 +12,15 @@
         <input type="text" class="form-control flex-grow-1" id="accountLastName">
         <label for="accountLastName" class="form-label mb-0">Cognome</label>
       </div>
+      <div class="d-flex flex-grow-1 align-items-center gap-3 form-floating">
+        <input type="email" class="form-control flex-grow-1" id="accountEmail">
+        <label for="accountEmail" class="form-label mb-0">Email</label>
+      </div>
     </div>
     <button type="button" class="d-flex align-self-start btn btn-outline-primary btn-sm mt-3">Salva</button>
   </div>
   
-  <div class="d-flex flex-grow-1 flex-shrink-1 mt-3 slide flex-column">
+  <div class="d-flex flex-grow-1 flex-shrink-1 mt-3 slide flex-column" data-ltw-settings="changePassword">
     <h6 class="d-flex">Password</h6>
     <div class="d-flex flex-grow-1 flex-shrink-1 mt-2 gap-3 flex-column">
       <div class="d-flex flex-grow-1 align-items-center gap-3 form-floating">
@@ -25,7 +29,7 @@
       </div>
       <div class="d-flex flex-grow-1 align-items-center gap-3 form-floating">
         <input type="password" class="form-control flex-grow-1" id="changePwdNew">
-        <label for="changePwdOld" class="form-label mb-0">Nuova password</label>
+        <label for="changePwdNew" class="form-label mb-0">Nuova password</label>
       </div>
       <div class="d-flex flex-grow-1 align-items-center gap-3 form-floating">
         <input type="password" class="form-control flex-grow-1" id="changePwdNewConfirm">
@@ -35,7 +39,7 @@
     <button type="button" class="d-flex align-self-start btn btn-outline-primary btn-sm mt-3">Salva</button>
   </div>
 
-  <div class="d-flex flex-grow-1 flex-shrink-1 mt-3 slide flex-column">
+  <div class="d-flex flex-grow-1 flex-shrink-1 mt-3 slide flex-column" data-ltw-settings="chartsPreferences">
     <h6 class="d-flex">Grafici</h6>
     <div class="d-flex flex-grow-1 flex-shrink-1 mt-2 gap-3">
       <div class="d-flex flex-grow-1 align-items-center gap-3 form-floating">
@@ -56,3 +60,85 @@
     <button type="button" class="d-flex align-self-start btn btn-outline-primary btn-sm mt-3">Salva</button>
   </div>
 </div><!-- end container -->
+
+<script type="text/javascript">
+  fetch('/settings')
+    .then(response => response.json())
+    .then(settings => {
+      if (settings.chartsPreferences && settings.chartsPreferences.eventsPropertyOnCharts) {
+        $('#eventsPropertyOnCharts').val(settings.chartsPreferences.eventsPropertyOnCharts);
+      }
+      if (settings.chartsPreferences && settings.chartsPreferences.rememberChartsSize) {
+        $('#rememberChartsSize').val(settings.chartsPreferences.rememberChartsSize);
+      }
+    })
+    .catch(error => {
+      showToast('Errore recupero impostazioni', 'danger');
+    });
+
+  $(document).ready(function() {
+    let formBtnSelector = `
+      [data-ltw-settings="customerData"] button[type="button"],
+      [data-ltw-settings="changePassword"] button[type="button"],
+      [data-ltw-settings="chartsPreferences"] button[type="button"]`;
+
+    $(document)
+      .off('click', formBtnSelector)
+      .on('click', formBtnSelector, (e) => {
+        
+        let settingsType = $(e.currentTarget).closest('[data-ltw-settings]').data('ltw-settings');
+        let config = null;
+
+        switch (settingsType) {
+          case 'customerData':
+            config = {
+              firstName: $('#accountFirstName').val(),
+              lastName: $('#accountLastName').val(),
+              email: $('#accountEmail').val()
+            };
+            break;
+
+          case 'changePassword':
+            config = {
+              oldPwd: $('#changePwdOld').val(),
+              newPwd: $('#changePwdNew').val(),
+              confirmNewPwd: $('#changePwdNewConfirm').val()
+            };
+            break;
+
+          case 'chartsPreferences':
+            config = {
+              eventsPropertyOnCharts: $('#eventsPropertyOnCharts').val(),
+              rememberChartsSize: $('#rememberChartsSize').val()
+            };
+            break;
+
+          default:
+            showToast('Errore salvataggio impostazioni', 'danger');
+            return;
+        }
+
+        fetch('/settings/'+settingsType, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(config)
+        })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Errore HTTP: ' + response.status);
+            }
+            return response.text(); 
+          })
+          .then(data => {
+            showToast('Impostazioni salvate correttamente 1', 'success');
+          })
+          .catch(error => {
+            showToast('Errore salvataggio impostazioni', 'danger');
+          });
+    });
+
+  });
+  
+</script>
