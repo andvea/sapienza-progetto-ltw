@@ -211,7 +211,7 @@ app.get('/events', async function(req, res){
   await customerRepository.getSettings(customer);
   var customerSettings = (customer.getSettings() ? customer.getSettings() : {});
 
-  let listMyOwn = (customerSettings.events && customerSettings.events.listMyOwn
+  let listMyOwn = (customerSettings.chartsPreferences && customerSettings.chartsPreferences.eventsPropertyOnCharts=='miei'
       ? customer
       : null);
   
@@ -302,7 +302,7 @@ app.get('/data', async function(req, res){
   await customerRepository.getSettings(customer);
   var customerSettings = (customer.getSettings() ? customer.getSettings() : {});
 
-  let listMyOwn = (customerSettings.events && customerSettings.events.listMyOwn
+  let listMyOwn = (customerSettings.chartsPreferences && customerSettings.chartsPreferences.eventsPropertyOnCharts=='miei'
       ? customer
       : null);
 
