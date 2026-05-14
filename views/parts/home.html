@@ -1,126 +1,217 @@
 <div class="container p-0">
   <h4>Home</h4>
+
+  <form class="d-flex mt-3 mb-5 gap-4" style="max-width: 80%;">
+    <div class="d-flex flex-grow-1 align-items-center gap-3 form-floating">
+      <input 
+          type="datetime-local" 
+          class="form-control flex-grow-1" 
+          id="datetimeFrom"
+          min="2025-10-15T14:00" 
+          max="2025-11-09T17:40"
+          value="2025-10-15T14:00">
+      <label for="datetimeFrom" class="form-label mb-0">Dal</label>
+    </div>
+    <div class="d-flex flex-grow-1 align-items-center gap-3 form-floating">
+      <input 
+          type="datetime-local" 
+          class="form-control flex-grow-1" 
+          id="datetimeTo"
+          min="2025-10-15T14:00" 
+          max="2025-11-09T17:40"
+          value="2025-10-16T14:00">
+      <label for="datetimeTo" class="form-label mb-0">Al</label>
+    </div>
+    <div class="d-flex flex-grow-1 align-items-center gap-3 form-floating">
+      <select class="form-select" id="eventType" aria-label="Default select example">
+        <option value="Tutti">Tutti</option>
+        <option value="Sereno">Sereno</option>
+        <option value="Nuvoloso">Nuvoloso</option>
+        <option value="Pioggia">Pioggia</option>
+        <option value="Temporale">Temporale</option>
+        <option value="Nebbia">Nebbia</option>
+        <option value="Neve">Neve</option>
+      </select>
+      <label for="eventType">Eventi</label>
+    </div>
+    <div class="d-flex flex-grow-1 align-items-center gap-3 form-floating">
+      <a href="javascript:clearFilters()" class="text-decoration-none">Cancella</a>
+    </div>
+  </form>
+
   <div class="d-flex flex-grow-1 flex-shrink-1 mt-3 slides gap-3" style="flex-wrap: wrap;"></div>
 </div><!-- end container -->
 
 <script type="text/javascript">
-  function loadCharts(){
-    var DATA_COUNT = 12;
-    var labels = [];
-    for (let i = 0; i < DATA_COUNT; ++i) {
-      labels.push(i.toString());
-    }
-    var datapoints = [0, 20, 20, 60, 60, 120, NaN, 180, 120, 125, 105, 110, 170];
+  var chartInstances = [];
 
-    new Chart(document.querySelector('#myChart1Container > canvas'), {
-      type: 'line',
-      data: {
-        labels: labels,
-        datasets: [
-          {
-            label: 'Cubic interpolation (monotone)',
-            data: datapoints,
-            borderColor: '#DA3A3A',
-            fill: false,
-            cubicInterpolationMode: 'monotone',
-            tension: 0.4
-          }, {
-            label: 'Cubic interpolation',
-            data: datapoints,
-            borderColor: 'blue',
-            fill: false,
-            tension: 0.4
-          }, {
-            label: 'Linear interpolation (default)',
-            data: datapoints,
-            borderColor: 'green',
-            fill: false
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          title: {
-            display: true,
-            text: 'CHART 1 - Cubic interpolation mode'
-          },
-        },
-        interaction: {
-          intersect: false,
-        },
-        scales: {
-          x: {
-            display: true,
-            title: {
-              display: true
-            }
-          },
-          y: {
-            display: true,
-            title: {
-              display: true,
-              text: 'Value'
-            },
-            suggestedMin: -10,
-            suggestedMax: 200
-          }
+  function clearFilters(){
+    $('#datetimeFrom, #datetimeTo').val('');
+    $('#eventType').val('Tutti');
+    loadData();
+  }
+
+  function loadData(queryString = ''){
+    var datetimeFrom = $('#datetimeFrom').val();
+    var datetimeTo = $('#datetimeTo').val();
+    var type = $('#eventType').val();
+
+    const params = new URLSearchParams(queryString);
+
+    if (datetimeFrom){ params.append('datetimeFrom', datetimeFrom); }
+    if (datetimeTo){ params.append('datetimeTo', datetimeTo); }
+    if (type){ params.append('type', type); }
+
+    queryString = params.toString() ? '?' + params.toString() : '';
+
+    fetch('/data'+queryString)
+      .then(response => response.json())
+      .then(dataset => {
+        if (!dataset || dataset.length==0) {
+          showToast('Dati non trovati', 'warning');
+          return;
         }
-      },
-    });
 
-    new Chart(document.querySelector('#myChart2Container > canvas'), {
+        chartInstances.forEach((instance) => {
+          instance.destroy();
+        });
+
+        chartInstances = [];
+
+        var tempDataset = dataset.dataset.map(datapoint => {
+          return {
+            x: new Date(datapoint.datetime).getTime(), 
+            y: datapoint.temperatureCelsius
+          };
+        });
+        var dewpointDataset = dataset.dataset.map(datapoint => {
+          return {
+            x: new Date(datapoint.datetime).getTime(), 
+            y: datapoint.dewpointCelsius
+          };
+        });
+        var pressureDataset = dataset.dataset.map(datapoint => {
+          return {
+            x: new Date(datapoint.datetime).getTime(), 
+            y: datapoint.pressureHpa
+          };
+        });
+        var humidityDataset = dataset.dataset.map(datapoint => {
+          return {
+            x: new Date(datapoint.datetime).getTime(), 
+            y: datapoint.humidityPercentage
+          };
+        });
+        var eventsDataset = dataset.events.map(event => {
+          return {
+            x: new Date(event.datetime).getTime(),
+            y: 1,
+            title: event.name,
+            type: event.type
+          };
+        });
+
+        chartInstances.push(loadChart('Temperatura', 'Celsius', 
+            '#temperatureChartContainer', 'red', tempDataset, eventsDataset));
+        chartInstances.push(loadChart('Punto di rugiada', 'Celsius', 
+            '#dewpointChartContainer', 'green', dewpointDataset, eventsDataset));
+        chartInstances.push(loadChart('Pressione atmosferica', 'hPa', 
+            '#pressureChartContainer', 'orange', pressureDataset, eventsDataset));
+        chartInstances.push(loadChart('Umidità', '%', 
+            '#humidityChartContainer', 'blue', humidityDataset, eventsDataset));
+      })
+      .catch(error => {
+        showToast('Errore recupero dati', 'danger');
+      });
+  }
+
+  $('#datetimeFrom, #datetimeTo, #eventType').on('change', function() {
+    loadData();
+  });
+
+  function loadChart(title, valueTitle, DOMcontainer, color, dataset, events){
+    return new Chart(document.querySelector(DOMcontainer+' > canvas'), {
       type: 'line',
       data: {
-        labels: labels,
         datasets: [
           {
-            label: 'Cubic interpolation (monotone)',
-            data: datapoints,
-            borderColor: '#DA3A3A',
+            label: valueTitle,
+            data: dataset,
+            borderColor: color,
             fill: false,
-            cubicInterpolationMode: 'monotone',
-            tension: 0.4
-          }, {
-            label: 'Cubic interpolation',
-            data: datapoints,
-            borderColor: 'blue',
-            fill: false,
-            tension: 0.4
-          }, {
-            label: 'Linear interpolation (default)',
-            data: datapoints,
-            borderColor: 'green',
-            fill: false
+            tension: 0.4,
+            pointStyle: false
+          },
+          {
+            label: 'Eventi',
+            data: events,
+            yAxisID: 'yEvents',
+            borderColor: 'purple',
+            backgroundColor: 'purple',
+            pointStyle: 'circle',
+            pointRadius: 5,
+            showLine: false
           }
         ]
       },
       options: {
         responsive: true,
         plugins: {
+          decimation: {
+            enabled: true
+          },
           title: {
             display: true,
-            text: 'CHART 2 - Cubic interpolation mode'
+            text: title
           },
+          tooltip: {
+            callbacks: {
+              label: function(context){
+                if (context.dataset.label=='Eventi'){
+                  return context.raw.type;
+                }
+              },
+              title: function(context) {
+                const d = new Date(context[0].parsed.x);
+                return d.toLocaleDateString('it-IT', {
+                  day: '2-digit',
+                  month: 'short',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                });
+              }
+            }
+          }
         },
         interaction: {
           intersect: false,
         },
         scales: {
           x: {
-            display: true,
-            title: {
-              display: true
+            type: 'linear',
+            ticks: {
+              callback: function(value) {
+                const d = new Date(value);
+                return d.toLocaleDateString('it-IT', {
+                  day: '2-digit',
+                  month: 'short',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                });
+              }
             }
           },
           y: {
-            display: true,
             title: {
               display: true,
-              text: 'Value'
-            },
-            suggestedMin: -10,
-            suggestedMax: 200
+              text: valueTitle
+            }
+          },
+          yEvents: {
+            type: 'linear',
+            display: false,
+            min: 0,
+            max: 1.1
           }
         }
       },
@@ -148,10 +239,10 @@
     })
       .then(response => response.text())
       .then(data => {
-        // show tooltip
+        showToast('Preferenze salvata', 'success');
       })
       .catch(error => {
-        // show error tooltip
+        showToast('Errore salvataggio preferenze', 'danger');
       });
   }
 
@@ -161,16 +252,25 @@
       if (settings.charts) {
         settings.charts.forEach((chartSettings) => {
           $('.slides').append(`
-            <div id="${chartSettings.id}" class="slide" style="width: ${chartSettings.width}px; height: ${chartSettings.height}px;">
-              <canvas></canvas>
+            <div 
+              id="${chartSettings.id}" 
+              class="slide" 
+              style="width: ${chartSettings.width}px; height: ${chartSettings.height}px;">
+                <canvas></canvas>
             </div>`);
         });
       } else {
         $('.slides').append(`
-          <div id="myChart1Container" class="slide">
+          <div id="temperatureChartContainer" class="slide">
             <canvas></canvas>
           </div>
-          <div id="myChart2Container" class="slide">
+          <div id="dewpointChartContainer" class="slide">
+            <canvas></canvas>
+          </div>
+          <div id="pressureChartContainer" class="slide">
+            <canvas></canvas>
+          </div>
+          <div id="humidityChartContainer" class="slide">
             <canvas></canvas>
           </div>`);
       }
@@ -184,7 +284,10 @@
           placeholderHeight = ui.item.outerHeight();
           ui.placeholder.width(placeholderWidth);
           ui.placeholder.height(placeholderHeight);
-          $('<div class="slide-placeholder-animator" data-width="'+placeholderWidth+'" data-height="' + placeholderHeight + '"></div>').insertAfter(ui.placeholder);
+          $(`<div 
+              class="slide-placeholder-animator" 
+              data-width="${placeholderWidth}" 
+              data-height="${placeholderHeight}"></div>`).insertAfter(ui.placeholder);
         },
         stop: function(e, ui) {  
           $(".slide-placeholder-animator").remove();
@@ -200,9 +303,9 @@
         }
       });
 
-      loadCharts();
+      loadData();
     })
     .catch(error => {
-      console.log(error);
+      showToast('Errore recupero preferenze', 'danger');
     });
 </script>

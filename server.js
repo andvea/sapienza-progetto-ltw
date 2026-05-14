@@ -9,6 +9,7 @@ import mysql from 'mysql2/promise';
 import {Authentication} from './classes/Authentication.js';
 import {Customer, CustomerRepository} from './classes/Customer.js';
 import {WeatherEvent, WeatherEventRepository} from './classes/WeatherEvent.js';
+import {WeatherData, WeatherDataRepository} from './classes/WeatherData.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -28,6 +29,7 @@ var mysqlPool = mysql.createPool({
 
 const customerRepository = new CustomerRepository(mysqlPool);
 const weatherEventRepository = new WeatherEventRepository(mysqlPool);
+const weatherDataRepository = new WeatherDataRepository(mysqlPool);
 const authentication = new Authentication();
 
 app.use(express.urlencoded({ extended: true }));
@@ -287,4 +289,54 @@ app.post('/events/delete/:id', async function(req, res){
     let errCode = (err.cause && err.cause.errorCode ? err.cause.errorCode : 500);
     return res.status(errCode).send('An error occurred');
   }
+});
+
+app.get('/data', async function(req, res){
+  req.query.type = (req.query.type=='Tutti' ? null : req.query.type);
+
+  let JSONres = {dataset: [], events: []};
+  let dataset;
+  let events;
+
+  var customer = new Customer(req.AUTH_MIDDLEWARE.userInfo.userId);
+  await customerRepository.getSettings(customer);
+  var customerSettings = (customer.getSettings() ? customer.getSettings() : {});
+
+  let listMyOwn = (customerSettings.events && customerSettings.events.listMyOwn
+      ? customer
+      : null);
+
+  try {
+    dataset = await weatherDataRepository.list(req.query.datetimeFrom, req.query.datetimeTo);
+    events = await weatherEventRepository.list(listMyOwn, null, null, 99999999,
+        req.query.datetimeFrom, req.query.datetimeTo, req.query.type);
+  } catch (err) {
+    let errCode = (err.cause && err.cause.errorCode ? err.cause.errorCode : 500);
+    return res.status(errCode).send('An error occurred');
+  }
+
+  for (var i=0; i<dataset.length; i++) {
+    JSONres.dataset.push({
+      kind: 'data',
+      datetime: dataset[i].getDatetime(),
+      temperatureCelsius: dataset[i].getTemperature(),
+      dewpointCelsius: dataset[i].getDewpoint(),
+      pressureHpa: dataset[i].getPressure(),
+      humidityPercentage: dataset[i].getHumidity()
+    });
+  }
+
+  for (var i=0; i<events.length; i++) {
+    JSONres.events.push({
+      kind: 'event',
+      id: events[i].getId(),
+      customerName: `${events[i].getCustomer().getFirstName()} ${events[i].getCustomer().getLastName()}`,
+      name: events[i].getName(),
+      type: events[i].getType(),
+      datetime: events[i].getDatetime(),
+      description: events[i].getDescription()
+    });
+  }
+
+  return res.status(200).send(JSONres);
 });
