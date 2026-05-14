@@ -9,6 +9,7 @@ import mysql from 'mysql2/promise';
 import {Authentication} from './classes/Authentication.js';
 import {Customer, CustomerRepository} from './classes/Customer.js';
 import {WeatherEvent, WeatherEventRepository} from './classes/WeatherEvent.js';
+import {WeatherData, WeatherDataRepository} from './classes/WeatherData.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -28,6 +29,7 @@ var mysqlPool = mysql.createPool({
 
 const customerRepository = new CustomerRepository(mysqlPool);
 const weatherEventRepository = new WeatherEventRepository(mysqlPool);
+const weatherDataRepository = new WeatherDataRepository(mysqlPool);
 const authentication = new Authentication();
 
 app.use(express.urlencoded({ extended: true }));
@@ -269,4 +271,28 @@ app.post('/events/delete/:id', async function(req, res){
     let errCode = (err.cause && err.cause.errorCode ? err.cause.errorCode : 500);
     return res.status(errCode).send('An error occurred');
   }
+});
+
+app.get('/data', async function(req, res){
+  let JSONres = [];
+  let dataset;
+
+  try {
+    dataset = await weatherDataRepository.list(req.query.datetimeFrom, req.query.datetimeTo);
+  } catch (err) {
+    let errCode = (err.cause && err.cause.errorCode ? err.cause.errorCode : 500);
+    return res.status(errCode).send('An error occurred');
+  }
+
+  for (var i=0; i<dataset.length; i++) {
+    JSONres.push({
+      datetime: dataset[i].getDatetime(),
+      temperatureCelsius: dataset[i].getTemperature(),
+      dewpointCelsius: dataset[i].getDewpoint(),
+      pressureHpa: dataset[i].getPressure(),
+      humidityPercentage: dataset[i].getHumidity()
+    });
+  }
+
+  return res.status(200).send(JSONres);
 });
