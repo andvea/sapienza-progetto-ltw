@@ -88,39 +88,47 @@
 
         chartInstances = [];
 
-        var tempDataset = dataset.map(datapoint => {
+        var tempDataset = dataset.dataset.map(datapoint => {
           return {
             x: new Date(datapoint.datetime).getTime(), 
             y: datapoint.temperatureCelsius
           };
         });
-        var dewpointDataset = dataset.map(datapoint => {
+        var dewpointDataset = dataset.dataset.map(datapoint => {
           return {
             x: new Date(datapoint.datetime).getTime(), 
             y: datapoint.dewpointCelsius
           };
         });
-        var pressureDataset = dataset.map(datapoint => {
+        var pressureDataset = dataset.dataset.map(datapoint => {
           return {
             x: new Date(datapoint.datetime).getTime(), 
             y: datapoint.pressureHpa
           };
         });
-        var humidityDataset = dataset.map(datapoint => {
+        var humidityDataset = dataset.dataset.map(datapoint => {
           return {
             x: new Date(datapoint.datetime).getTime(), 
             y: datapoint.humidityPercentage
           };
         });
+        var eventsDataset = dataset.events.map(event => {
+          return {
+            x: new Date(event.datetime).getTime(),
+            y: 1,
+            title: event.name,
+            type: event.type
+          };
+        });
 
         chartInstances.push(loadChart('Temperatura', 'Celsius', 
-            '#temperatureChartContainer', 'red', tempDataset, null));
+            '#temperatureChartContainer', 'red', tempDataset, eventsDataset));
         chartInstances.push(loadChart('Punto di rugiada', 'Celsius', 
-            '#dewpointChartContainer', 'green', dewpointDataset, null));
+            '#dewpointChartContainer', 'green', dewpointDataset, eventsDataset));
         chartInstances.push(loadChart('Pressione atmosferica', 'hPa', 
-            '#pressureChartContainer', 'orange', pressureDataset, null));
+            '#pressureChartContainer', 'orange', pressureDataset, eventsDataset));
         chartInstances.push(loadChart('Umidità', '%', 
-            '#humidityChartContainer', 'blue', humidityDataset, null));
+            '#humidityChartContainer', 'blue', humidityDataset, eventsDataset));
       })
       .catch(error => {
         showToast('Errore recupero dati', 'danger');
@@ -143,6 +151,16 @@
             fill: false,
             tension: 0.4,
             pointStyle: false
+          },
+          {
+            label: 'Eventi',
+            data: events,
+            yAxisID: 'yEvents',
+            borderColor: 'purple',
+            backgroundColor: 'purple',
+            pointStyle: 'circle',
+            pointRadius: 5,
+            showLine: false
           }
         ]
       },
@@ -158,6 +176,11 @@
           },
           tooltip: {
             callbacks: {
+              label: function(context){
+                if (context.dataset.label=='Eventi'){
+                  return context.raw.type;
+                }
+              },
               title: function(context) {
                 const d = new Date(context[0].parsed.x);
                 return d.toLocaleDateString('it-IT', {
@@ -193,6 +216,12 @@
               display: true,
               text: valueTitle
             }
+          },
+          yEvents: {
+            type: 'linear',
+            display: false,
+            min: 0,
+            max: 1.1
           }
         }
       },
