@@ -44,6 +44,7 @@
 
 <script type="text/javascript">
   var chartInstances = [];
+  var eventsPointColor = 'gray';
 
   function clearFilters(){
     $('#datetimeFrom, #datetimeTo').val('');
@@ -146,8 +147,8 @@
             label: 'Eventi',
             data: events,
             yAxisID: 'yEvents',
-            borderColor: 'purple',
-            backgroundColor: 'purple',
+            borderColor: eventsPointColor,
+            backgroundColor: eventsPointColor,
             pointStyle: 'circle',
             pointRadius: 5,
             showLine: false
@@ -249,6 +250,10 @@
   fetch('/settings')
     .then(response => response.json())
     .then(settings => {
+      if (settings.chartsPreferences && settings.chartsPreferences.eventsPointColor) {
+        eventsPointColor = settings.chartsPreferences.eventsPointColor;
+      }
+
       if (settings.charts) {
         settings.charts.forEach((chartSettings) => {
           $('.slides').append(`

@@ -50,11 +50,8 @@
         <label for="eventsPropertyOnCharts">Mostra eventi</label>
       </div>
       <div class="d-flex flex-grow-1 align-items-center gap-3 form-floating">
-        <select class="form-select" id="rememberChartsSize" aria-label="Default select example">
-          <option value="true">Ricorda preferenze</option>
-          <option value="false">Dimentica</option>
-        </select>
-        <label for="rememberChartsSize">Dimensione e disposizione</label>
+        <input type="text" class="form-control flex-grow-1" id="eventsPointColor">
+        <label for="eventsPointColor" class="form-label mb-0">Colore eventi</label>
       </div>
     </div>
     <button type="button" class="d-flex align-self-start btn btn-outline-primary btn-sm mt-3">Salva</button>
@@ -68,8 +65,8 @@
       if (settings.chartsPreferences && settings.chartsPreferences.eventsPropertyOnCharts) {
         $('#eventsPropertyOnCharts').val(settings.chartsPreferences.eventsPropertyOnCharts);
       }
-      if (settings.chartsPreferences && settings.chartsPreferences.rememberChartsSize) {
-        $('#rememberChartsSize').val(settings.chartsPreferences.rememberChartsSize);
+      if (settings.chartsPreferences && settings.chartsPreferences.eventsPointColor) {
+        $('#eventsPointColor').val(settings.chartsPreferences.eventsPointColor);
       }
     })
     .catch(error => {
@@ -109,7 +106,7 @@
           case 'chartsPreferences':
             config = {
               eventsPropertyOnCharts: $('#eventsPropertyOnCharts').val(),
-              rememberChartsSize: $('#rememberChartsSize').val()
+              eventsPointColor: $('#eventsPointColor').val()
             };
             break;
 
