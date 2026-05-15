@@ -9,7 +9,16 @@
 </style>
 
 <div class="container p-0">
-  <h4>Home</h4>
+  <div class="d-flex align-items-center">
+    <div class="flex-grow-1">
+      <h4 class="m-0">Home</h4>
+    </div>
+    <div class="flex-grow-1 text-end">
+      <button type="button" class="btn btn-secondary btn-sm" onclick="exportCharts()">
+        Esporta
+      </button>
+    </div>
+  </div>
 
   <form class="d-flex mt-3 mb-5 gap-4" style="max-width: 80%;">
     <div class="d-flex flex-grow-1 align-items-center gap-3 form-floating">
@@ -318,4 +327,36 @@
     .catch(error => {
       showToast('Errore recupero preferenze', 'danger');
     });
+
+    function exportCharts(){
+      const chartsSelectors = ['temperatureChartContainer', 'dewpointChartContainer',
+          'pressureChartContainer', 'humidityChartContainer'];
+
+      var canvas = document.querySelector('#'+chartsSelectors[0]+' > canvas');
+      const tempCanvas = document.createElement('canvas');
+      
+      const tempCtx = tempCanvas.getContext('2d');
+      tempCanvas.width = canvas.width*2;
+      tempCanvas.height = canvas.height*2;
+      tempCtx.fillStyle = "#FFFFFF";
+      tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+      chartsSelectors.forEach((selector, index) => {
+        canvas = document.querySelector('#'+selector+' > canvas');
+        
+        // index = 0 % 2 = 0 | Math.floor(0 / 2) = 0
+        // index = 1 % 2 = 1 | Math.floor(1 / 2) = 0
+        // index = 2 % 2 = 0 | Math.floor(2 / 2) = 1
+        // index = 3 % 2 = 1 | Math.floor(3 / 2) = 1
+        const x = (index % 2) * canvas.width;
+        const y = Math.floor(index / 2) * canvas.height;
+
+        tempCtx.drawImage(canvas, x, y, canvas.width, canvas.height);
+      });
+
+      const link = document.createElement('a');
+      link.href = tempCanvas.toDataURL('image/jpeg', 1);
+      link.download = 'export-charts.jpg';
+      link.click();
+    }
 </script>
