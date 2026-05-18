@@ -105,8 +105,7 @@ app.post('/signin', async function(req, res){
       userId: customer.getId(),
       email: customer.getEmail(),
       first_name: customer.getFirstName(),
-      last_name: customer.getLastName(),
-      picture: customer.getProfilePic()
+      last_name: customer.getLastName()
     }
 
     authentication.setAuthCookie( res, userInfo );
@@ -120,7 +119,6 @@ app.post('/signin', async function(req, res){
 app.post('/signup', async function(req, res){
   const firstName = req.body.first_name;
   const lastName = req.body.last_name;
-  const profilePic = req.body.profile_pic;
   const email = req.body.email;
   const pwd = req.body.pwd;
 
@@ -133,7 +131,6 @@ app.post('/signup', async function(req, res){
 
     customer.setFirstName(firstName);
     customer.setLastName(lastName);
-    customer.setProfilePic(profilePic);
     customer.setEmail(email);
     customer.setPwd(Customer.hashPwd(pwd));
 

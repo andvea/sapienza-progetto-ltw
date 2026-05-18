@@ -47,14 +47,6 @@ export class Customer {
     this.last_name = lastName;
   }
 
-  getProfilePic(){
-    return this.profile_pic;
-  }
-
-  setProfilePic(profilePic){
-    this.profile_pic = profilePic;
-  }
-
   getSettings(){
     return this.settings;
   }
@@ -84,7 +76,6 @@ export class CustomerRepository {
         c.setEmail(customerFromDb[0][0].email);
         c.setFirstName(customerFromDb[0][0].first_name);
         c.setLastName(customerFromDb[0][0].last_name);
-        c.setProfilePic(customerFromDb[0][0].profile_pic);
 
         return c;
       } else {
@@ -115,7 +106,6 @@ export class CustomerRepository {
         c.setEmail(customerFromDb[0][0].email);
         c.setFirstName(customerFromDb[0][0].first_name);
         c.setLastName(customerFromDb[0][0].last_name);
-        c.setProfilePic(customerFromDb[0][0].profile_pic);
 
         return c;
       } else {
@@ -137,15 +127,14 @@ export class CustomerRepository {
       var res = await this.mySqlPool.query(`
         INSERT INTO 
           ${global.ENV.DATABASE_CUSTOMERS_TABLE}
-          (email, pwd, first_name, last_name, profile_pic)
-        VALUES (?, ?, ?, ?, ?)
+          (email, pwd, first_name, last_name)
+        VALUES (?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE email = email`,
         [
           customer.getEmail(),
           customer.getPwd(),
           customer.getFirstName(), 
-          customer.getLastName(),
-          customer.getProfilePic()
+          customer.getLastName()
         ]);
 
       if (!res[0].insertId) {
