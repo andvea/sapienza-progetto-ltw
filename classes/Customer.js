@@ -207,4 +207,54 @@ export class CustomerRepository {
     }
   }
 
+  async updateProperty(customer, propertyName, propertyValue, condition = null) {
+    try {
+      var res = await this.mySqlPool.query(`
+        UPDATE
+          ${global.ENV.DATABASE_CUSTOMERS_TABLE} 
+        SET ${propertyName} = ? 
+        WHERE local_id = ? 
+        ${(condition ? `AND ${condition}` : '')}`,
+        [
+          propertyValue,
+          customer.getId()
+        ]);
+
+      if (res[0].affectedRows === 0) {
+        throw new Error('Can\t update customer\'s property', {
+          cause:{ errorCode: 500, originError: null }
+        });
+      }
+
+      switch(propertyName) {
+        case 'pwd':
+          customer.setPwd(propertyValue);
+          break;
+        case 'first_name':
+          customer.setFirstName(propertyValue);
+          break;
+        case 'last_name':
+          customer.setLastName(propertyValue);
+          break;
+        case 'email':
+          customer.setEmail(propertyValue);
+          break;
+        default:
+          throw new Error('Unrecognized customer\'s property', {
+            cause:{ errorCode: 400, originError: null }
+          });
+          break;
+      }
+
+      return customer;
+    } catch(dbError) {
+      throw new Error((dbError.message ? dbError.message : 'An error occurred with db'), {
+        cause: {
+          errorCode: (dbError.cause && dbError.cause.errorCode ? dbError.cause.errorCode : 500),
+          originError: dbError
+        }
+      });
+    }
+  }
+
 }

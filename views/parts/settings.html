@@ -1,8 +1,141 @@
-<!DOCTYPE html>
-<html>
-<body>
+<div class="container p-0" style="max-width: 900px;">
+  <h4>Impostazioni</h4>
+  
+  <div class="d-flex flex-grow-1 flex-shrink-1 mt-3 slide flex-column" data-ltw-settings="customerData">
+    <h6 class="d-flex">Account</h6>
+    <div class="d-flex flex-grow-1 flex-shrink-1 mt-2 gap-3 flex-column">
+      <div class="d-flex flex-grow-1 align-items-center gap-3 form-floating">
+        <input type="text" class="form-control flex-grow-1" id="accountFirstName">
+        <label for="accountFirstName" class="form-label mb-0">Nome</label>
+      </div>
+      <div class="d-flex flex-grow-1 align-items-center gap-3 form-floating">
+        <input type="text" class="form-control flex-grow-1" id="accountLastName">
+        <label for="accountLastName" class="form-label mb-0">Cognome</label>
+      </div>
+      <div class="d-flex flex-grow-1 align-items-center gap-3 form-floating">
+        <input type="email" class="form-control flex-grow-1" id="accountEmail">
+        <label for="accountEmail" class="form-label mb-0">Email</label>
+      </div>
+    </div>
+    <button type="button" class="d-flex align-self-start btn btn-outline-primary btn-sm mt-3">Salva</button>
+  </div>
+  
+  <div class="d-flex flex-grow-1 flex-shrink-1 mt-3 slide flex-column" data-ltw-settings="changePassword">
+    <h6 class="d-flex">Password</h6>
+    <div class="d-flex flex-grow-1 flex-shrink-1 mt-2 gap-3 flex-column">
+      <div class="d-flex flex-grow-1 align-items-center gap-3 form-floating">
+        <input type="password" class="form-control flex-grow-1" id="changePwdOld">
+        <label for="changePwdOld" class="form-label mb-0">Vecchia password</label>
+      </div>
+      <div class="d-flex flex-grow-1 align-items-center gap-3 form-floating">
+        <input type="password" class="form-control flex-grow-1" id="changePwdNew">
+        <label for="changePwdNew" class="form-label mb-0">Nuova password</label>
+      </div>
+      <div class="d-flex flex-grow-1 align-items-center gap-3 form-floating">
+        <input type="password" class="form-control flex-grow-1" id="changePwdNewConfirm">
+        <label for="changePwdNewConfirm" class="form-label mb-0">Conferma nuova password</label>
+      </div>
+    </div>
+    <button type="button" class="d-flex align-self-start btn btn-outline-primary btn-sm mt-3">Salva</button>
+  </div>
 
-<p>Pagina impostazioni</p>
+  <div class="d-flex flex-grow-1 flex-shrink-1 mt-3 slide flex-column" data-ltw-settings="chartsPreferences">
+    <h6 class="d-flex">Grafici</h6>
+    <div class="d-flex flex-grow-1 flex-shrink-1 mt-2 gap-3">
+      <div class="d-flex flex-grow-1 align-items-center gap-3 form-floating">
+        <select class="form-select" id="eventsPropertyOnCharts" aria-label="Default select example">
+          <option value="tutti">Tutti</option>
+          <option value="miei">Solo miei</option>
+        </select>
+        <label for="eventsPropertyOnCharts">Mostra eventi</label>
+      </div>
+      <div class="d-flex flex-grow-1 align-items-center gap-3 form-floating">
+        <input type="text" class="form-control flex-grow-1" id="eventsPointColor">
+        <label for="eventsPointColor" class="form-label mb-0">Colore eventi</label>
+      </div>
+    </div>
+    <button type="button" class="d-flex align-self-start btn btn-outline-primary btn-sm mt-3">Salva</button>
+  </div>
+</div><!-- end container -->
 
-</body>
-</html>
+<script type="text/javascript">
+  fetch('/settings')
+    .then(response => response.json())
+    .then(settings => {
+      if (settings.chartsPreferences && settings.chartsPreferences.eventsPropertyOnCharts) {
+        $('#eventsPropertyOnCharts').val(settings.chartsPreferences.eventsPropertyOnCharts);
+      }
+      if (settings.chartsPreferences && settings.chartsPreferences.eventsPointColor) {
+        $('#eventsPointColor').val(settings.chartsPreferences.eventsPointColor);
+      }
+    })
+    .catch(error => {
+      showToast('Errore recupero impostazioni', 'danger');
+    });
+
+  $(document).ready(function() {
+    let formBtnSelector = `
+      [data-ltw-settings="customerData"] button[type="button"],
+      [data-ltw-settings="changePassword"] button[type="button"],
+      [data-ltw-settings="chartsPreferences"] button[type="button"]`;
+
+    $(document)
+      .off('click', formBtnSelector)
+      .on('click', formBtnSelector, (e) => {
+        
+        let settingsType = $(e.currentTarget).closest('[data-ltw-settings]').data('ltw-settings');
+        let config = null;
+
+        switch (settingsType) {
+          case 'customerData':
+            config = {
+              firstName: $('#accountFirstName').val(),
+              lastName: $('#accountLastName').val(),
+              email: $('#accountEmail').val()
+            };
+            break;
+
+          case 'changePassword':
+            config = {
+              oldPwd: $('#changePwdOld').val(),
+              newPwd: $('#changePwdNew').val(),
+              confirmNewPwd: $('#changePwdNewConfirm').val()
+            };
+            break;
+
+          case 'chartsPreferences':
+            config = {
+              eventsPropertyOnCharts: $('#eventsPropertyOnCharts').val(),
+              eventsPointColor: $('#eventsPointColor').val()
+            };
+            break;
+
+          default:
+            showToast('Errore salvataggio impostazioni', 'danger');
+            return;
+        }
+
+        fetch('/settings/'+settingsType, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(config)
+        })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Errore HTTP: ' + response.status);
+            }
+            return response.text(); 
+          })
+          .then(data => {
+            showToast('Impostazioni salvate correttamente 1', 'success');
+          })
+          .catch(error => {
+            showToast('Errore salvataggio impostazioni', 'danger');
+          });
+    });
+
+  });
+  
+</script>
