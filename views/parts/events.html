@@ -2,7 +2,7 @@
   .ltw-table-row{
     border-bottom: 1px solid #ddd; 
     padding: .6rem 1rem; 
-    gap: 1rem;
+    margin: 0;
   }
 
   .ltw-table-header{
@@ -18,11 +18,11 @@
     border-bottom-right-radius: inherit;
   }
 
-  .ltw-table-row > div[data-ltw-col="type"]{ flex: 120px 0 0; }
+  /*.ltw-table-row > div[data-ltw-col="type"]{ flex: 120px 0 0; }
   .ltw-table-row > div[data-ltw-col="customerName"]{ flex: 200px 0 0; }
   .ltw-table-row > div[data-ltw-col="ref"]{ flex: auto 1 0; }
   .ltw-table-row > div[data-ltw-col="datetime"]{ flex: 200px 0 0; }
-  .ltw-table-row > div[data-ltw-col="action"]{ flex: 100px 0 0; text-align: center; }
+  .ltw-table-row > div[data-ltw-col="action"]{ flex: 100px 0 0; text-align: center; }*/
 </style>
 
 <div class="container p-0">
@@ -38,7 +38,7 @@
     </div>
   </div>
 
-  <form class="d-flex mt-3 mb-5 gap-4" style="max-width: 80%;">
+  <form class="d-flex mt-3 mb-5 gap-2 gap-lg-4 flex-column flex-lg-row">
     <div class="d-flex flex-grow-1 align-items-center gap-3 form-floating">
       <input type="datetime-local" class="form-control flex-grow-1" id="datetimeFrom">
       <label for="datetimeFrom" class="form-label mb-0">Dal</label>
@@ -65,12 +65,12 @@
   </form>
 
   <div class="d-flex flex-column rounded-3 bg-white border border-secondary-subtle">
-    <div class="d-flex flex-grow-1 ltw-table-header ltw-table-row">
-      <div data-ltw-col="type">Tipo</div>
-      <div data-ltw-col="customerName">Autore</div>
-      <div data-ltw-col="ref">Riferimento</div>
-      <div data-ltw-col="datetime">Data</div>
-      <div data-ltw-col="action"></div>
+    <div class="row ltw-table-header ltw-table-row d-none d-lg-flex">
+      <div class="col-xs-12 col-lg-2">Tipo</div>
+      <div class="col-xs-12 col-lg-2">Autore</div>
+      <div class="col-xs-12 col-lg-4">Riferimento</div>
+      <div class="col-xs-12 col-lg-2">Data</div>
+      <div class="col-xs-12 col-lg-2"></div>
     </div>
 
     <div class="ltw-table-body"></div>
@@ -139,12 +139,12 @@
 
         events.events.forEach((event) => {
           $('.ltw-table-body').append(`
-            <div class="d-flex ltw-table-row flex-grow-1" data-ltw-event-id="${event.id}">
-              <div data-ltw-col="type">${event.type}</div>
-              <div data-ltw-col="customerName">${event.customerName}</div>
-              <div data-ltw-col="ref">Nome: ${event.name}<br/>Descrizione: ${event.description}</div>
-              <div data-ltw-col="datetime">${formatDateTime(event.datetime)}</div>
-              <div data-ltw-col="action">
+            <div class="row ltw-table-row" data-ltw-event-id="${event.id}">
+              <div class="col-xs-12 col-lg-2"><b class="d-lg-none">Tipo: </b>${event.type}</div>
+              <div class="col-xs-12 col-lg-2"><b class="d-lg-none">Autore: </b>${event.customerName}</div>
+              <div class="col-xs-12 col-lg-4"><b>Nome: </b>${event.name}<br/><b>Descrizione: </b>${event.description}</div>
+              <div class="col-xs-12 col-lg-2"><b class="d-lg-none">Data: </b>${formatDateTime(event.datetime)}</div>
+              <div class="col-xs-12 col-lg-2 mt-2 mt-lg-0 txt-start text-lg-center">
                 <a href="javascript:deleteEvent(${event.id})"><i class="bi bi-trash3"></i></a>
               </div>
             </div>`);
