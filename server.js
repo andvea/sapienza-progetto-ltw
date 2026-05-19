@@ -305,7 +305,7 @@ app.get('/data', async function(req, res){
 
   try {
     dataset = await weatherDataRepository.list(req.query.datetimeFrom, req.query.datetimeTo);
-    events = await weatherEventRepository.list(listMyOwn, null, null, 99999999,
+    events = await weatherEventRepository.list(listMyOwn, null, 0, 99999999,
         req.query.datetimeFrom, req.query.datetimeTo, req.query.type);
   } catch (err) {
     let errCode = (err.cause && err.cause.errorCode ? err.cause.errorCode : 500);
