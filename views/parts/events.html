@@ -17,12 +17,6 @@
     border-bottom-left-radius: inherit; 
     border-bottom-right-radius: inherit;
   }
-
-  /*.ltw-table-row > div[data-ltw-col="type"]{ flex: 120px 0 0; }
-  .ltw-table-row > div[data-ltw-col="customerName"]{ flex: 200px 0 0; }
-  .ltw-table-row > div[data-ltw-col="ref"]{ flex: auto 1 0; }
-  .ltw-table-row > div[data-ltw-col="datetime"]{ flex: 200px 0 0; }
-  .ltw-table-row > div[data-ltw-col="action"]{ flex: 100px 0 0; text-align: center; }*/
 </style>
 
 <div class="container p-0">
@@ -162,8 +156,10 @@
   }
 
   $(document).ready(function() {
-    $('#datetimeFrom, #datetimeTo, #eventType').on('change', function() {
-      loadEvents();
+    $('#datetimeFrom, #datetimeTo, #eventType')
+      .off('change')
+      .on('change', function() {
+        loadEvents();
     });
 
     $(document)

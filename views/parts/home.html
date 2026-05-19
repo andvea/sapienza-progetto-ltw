@@ -135,8 +135,10 @@
       });
   }
 
-  $('#datetimeFrom, #datetimeTo, #eventType').on('change', function() {
-    loadData();
+  $('#datetimeFrom, #datetimeTo, #eventType')
+    .off('change')
+    .on('change', function() {
+      loadData();
   });
 
   function loadChart(title, valueTitle, DOMcontainer, color, dataset, events){

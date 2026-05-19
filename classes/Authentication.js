@@ -26,7 +26,7 @@ export class Authentication{
         'Set-Cookie',
         this.authCookieName+'='+this.jwt.sign(token, this.jwt_key)+'; '+
         'Max-Age='+sessionMaxAge+'; '+
-        'Secure; HttpOnly'
+        'Secure;'
       );
   }
 
