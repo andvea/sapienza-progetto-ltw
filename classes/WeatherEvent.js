@@ -161,15 +161,15 @@ export class WeatherEventRepository {
     try {
       let where = [];
       let params = [];
+      let orderBy = 'ASC';
 
-      if (nextCursor) {
+      if (nextCursor!=null) {
         where.push('local_id > ?');
         params.push(nextCursor);
-      }
-
-      if (prevCursor) {
+      } else {
         where.push('local_id < ?');
         params.push(prevCursor);
+        orderBy = 'DESC';
       }
 
       if (customer) {
@@ -196,7 +196,7 @@ export class WeatherEventRepository {
         SELECT *
         FROM ${global.ENV.DATABASE_EVENTS_TABLE}
         ${where.length ? 'WHERE ' + where.join(' AND ') : ''}
-        ORDER BY datetime ASC
+        ORDER BY local_id ${orderBy}
         LIMIT ?`;
 
       params.push(limit);

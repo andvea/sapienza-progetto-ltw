@@ -201,7 +201,7 @@ app.post('/settings/:entity', async function(req, res){
 
 app.get('/events', async function(req, res){
   let prevCursor = ((req.query.prevCursor ) ? Buffer.from(req.query.prevCursor, 'base64').toString('utf8') : null);
-  let nextCursor = ((req.query.nextCursor ) ? Buffer.from(req.query.nextCursor, 'base64').toString('utf8') : null);
+  let nextCursor = ((req.query.nextCursor ) ? Buffer.from(req.query.nextCursor, 'base64').toString('utf8') : 0);
   req.query.type = (req.query.type=='Tutti' ? null : req.query.type);
 
   var customer = new Customer(req.AUTH_MIDDLEWARE.userInfo.userId);
